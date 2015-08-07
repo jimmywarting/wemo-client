@@ -1,5 +1,5 @@
 {
-  "name": "wemothat",
+  "name": "wemo-client",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/timonreinhard/wemothat.git"
+    "url": "git://github.com/timonreinhard/wemo-client.git"
   },
   "author": "Timon Reinhard",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/timonreinhard/wemothat/issues"
+    "url": "https://github.com/timonreinhard/wemo-client/issues"
   },
-  "homepage": "https://github.com/timonreinhard/wemothat",
+  "homepage": "https://github.com/timonreinhard/wemo-client",
   "dependencies": {
     "node-ssdp": "~2.5.1",
     "request": "~2.60.0",
