@@ -1,0 +1,30 @@
+{
+  "name": "wemothat",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/timonreinhard/wemothat.git"
+  },
+  "author": "Timon Reinhard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timonreinhard/wemothat/issues"
+  },
+  "homepage": "https://github.com/timonreinhard/wemothat",
+  "dependencies": {
+    "node-ssdp": "~2.5.1",
+    "request": "~2.60.0",
+    "url": "~0.10.3",
+    "xml2js": "~0.4.10",
+    "express": "~4.13.3",
+    "body-parser": "~1.13.3"
+  }
+}
