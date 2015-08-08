@@ -8,7 +8,7 @@ Low-level client library for controlling Wemo Devices. Supports event subscripti
   * [x] Wemo Insight Switch
   * [x] Wemo Switch
   * [x] Wemo Motion
-  * [ ] Wemo Maker
+  * [x] Wemo Maker
   * [ ] Osram Lightify TW
   * [ ] Osram Flex RGBW
   * [ ] Osram Gardenspot RGB

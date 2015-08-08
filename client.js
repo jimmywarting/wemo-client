@@ -13,6 +13,7 @@ var WemoClient = module.exports = function(config) {
   this.UDN = config.UDN;
   this.subscriptions = {};
   this.callbackURL = config.callbackURL;
+  this.device = config;
 
   // Create map of services
   config.serviceList.service.forEach(function(service){
@@ -200,6 +201,7 @@ WemoClient.prototype.unsubscribe = function(serviceType) {
   req.end();
 };
 
+// TODO: Refactor the callback handler.
 WemoClient.prototype.handleCallback = function(json) {
   var self = this;
   if (json['e:propertyset']['e:property'][0]['StatusChange']) {
@@ -227,6 +229,18 @@ WemoClient.prototype.handleCallback = function(json) {
       InstantPower: params[7]
     };
     self.emit('InsightParams', insightParams);
+  } else if (json['e:propertyset']['e:property'][0]['attributeList']) {
+    xml2js.parseString(json['e:propertyset']['e:property'][0]['attributeList'][0], function (err, xml) {
+      if (!err && xml) {
+        var attributeList = {
+          name: xml.attribute.name[0],
+          value: xml.attribute.value[0],
+          prevalue: xml.attribute.prevalue[0],
+          ts: xml.attribute.ts[0]
+        }
+        self.emit('AttributeList', attributeList);
+      }
+    });
   } else {
     console.log('Unhandled Event: %j', json);
     console.log(json['e:propertyset']['e:property'][0]);
