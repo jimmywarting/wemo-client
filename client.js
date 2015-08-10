@@ -33,7 +33,7 @@ util.inherits(WemoClient, EventEmitter);
 
 WemoClient.EventServices = {
   insightParams: 'urn:Belkin:service:insight:1',
-  statusChange: 'urn:Belkin:service:basicevent:1',
+  statusChange: 'urn:Belkin:service:bridge:1',
   attributeList: 'urn:Belkin:service:basicevent:1',
   binaryState:  'urn:Belkin:service:basicevent:1'
 };
