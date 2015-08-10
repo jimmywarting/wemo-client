@@ -248,7 +248,9 @@ WemoClient.prototype.handleCallback = function(json) {
       }
     });
   } else if (json['e:propertyset']['e:property'][0]['BinaryState']) {
-    self.emit('binaryState', json['e:propertyset']['e:property'][0]['BinaryState'][0]);
+    self.emit('binaryState',
+      json['e:propertyset']['e:property'][0]['BinaryState'][0].substring(0, 1)
+    );
   } else if (json['e:propertyset']['e:property'][0]['InsightParams']) {
     var params = json['e:propertyset']['e:property'][0]['InsightParams'][0].split('|');
     var insightParams = {
