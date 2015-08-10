@@ -19,6 +19,9 @@
     "url": "https://github.com/timonreinhard/wemo-client/issues"
   },
   "homepage": "https://github.com/timonreinhard/wemo-client",
+  "keywords": [
+    "wemo"
+  ],
   "dependencies": {
     "node-ssdp": "~2.5.1",
     "request": "~2.60.0",
