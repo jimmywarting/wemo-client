@@ -11,7 +11,7 @@ var WemoClient = require('./client');
 
 var Wemo = module.exports = function() {
   this._clients = {};
-  this.listen();
+  this._listen();
 };
 
 Wemo.prototype.discover = function(cb) {
@@ -47,7 +47,7 @@ Wemo.prototype.discover = function(cb) {
   ssdpClient.search('urn:Belkin:service:basicevent:1');
 };
 
-Wemo.prototype.listen = function() {
+Wemo.prototype._listen = function() {
   var self = this;
   var app = express();
   app.use(bodyparser.raw({type: 'text/xml'}));
