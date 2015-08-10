@@ -16,12 +16,10 @@ Low-level client library for controlling Wemo Devices. Supports event subscripti
 ## Install
 
 ```
-$ npm install timonreinhard/wemo-client
+$ npm install wemo-client
 ```
 
 ## Usage
-
-This project is at an early stage and the API is expected to change!
 
 ```javascript
 var Wemo = require('wemo-client');
