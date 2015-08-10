@@ -7,11 +7,9 @@ function foundDevice(device){
     console.log('Wemo Maker found: %s', device.friendlyName);
 
     var client = this.client(device);
-    client.on('AttributeList', function(event){
-      console.log('AttributeList for %s changed: %j', this.device.friendlyName, event);
+    client.on('attributeList', function(name, value){
+      console.log('Wemo Maker "%s" changed %s to %s', this.device.friendlyName, name, value);
     });
-
-    client.subscribe('urn:Belkin:service:basicevent:1');
 
     // Close the switch after 3 seconds
     setTimeout(function(){

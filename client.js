@@ -23,9 +23,20 @@ var WemoClient = module.exports = function(config) {
       eventSubURL: service.eventSubURL[0],
     };
   }, this.services = {});
+
+  // Transparently subscribe to serviceType events
+  // TODO: Unsubscribe from ServiceType when all listeners have been removed.
+  this.on('newListener', this._onListenerAdded);
 };
 
 util.inherits(WemoClient, EventEmitter);
+
+WemoClient.EventServices = {
+  insightParams: 'urn:Belkin:service:insight:1',
+  statusChange: 'urn:Belkin:service:basicevent:1',
+  attributeList: 'urn:Belkin:service:basicevent:1',
+  binaryState:  'urn:Belkin:service:basicevent:1'
+};
 
 WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
   var soapHeader = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>';
@@ -66,6 +77,7 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
 WemoClient.prototype.getEndDevices = function(cb) {
   var self = this;
 
+  // TODO: Refactor parsing and group handling
   var parseResponse = function(err, data) {
     if (err) cb(err);
     xml2js.parseString(data, function(err, result) {
@@ -138,16 +150,23 @@ WemoClient.prototype.setBinaryState = function(value) {
   this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value));
 };
 
-WemoClient.prototype.subscribe = function(serviceType) {
-  if (!serviceType) {
-    this._subscribeAll();
-    return;
+WemoClient.prototype._onListenerAdded = function(eventName) {
+  var serviceType = WemoClient.EventServices[eventName];
+  if (serviceType && this.services[serviceType]) {
+    this.subscribe(serviceType);
   }
+};
+
+WemoClient.prototype.subscribe = function(serviceType) {
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
     throw new Error('No callbackURL given!');
+  }
+  if (this.subscriptions[serviceType]) {
+    // Subscription already active
+    return;
   }
 
   var options = {
@@ -176,23 +195,12 @@ WemoClient.prototype.subscribe = function(serviceType) {
   options.headers.CALLBACK = '<' + callbackURL + '>';
   options.headers.NT = 'upnp:event';
 
+  this.subscriptions[serviceType] = true;
   var req = http.request(options, function(res) {
     this.subscriptions[serviceType] = res.headers.sid;
     setTimeout(renewSubscription.bind(this), 12 * 1000, serviceType);
   }.bind(this));
   req.end();
-};
-
-WemoClient.prototype._subscribeAll = function() {
-  var serviceTypes = [
-    'urn:Belkin:service:basicevent:1',
-    'urn:Belkin:service:insight:1'
-  ];
-  serviceTypes.forEach(function(serviceType){
-    if (this.services[serviceType]) {
-      this.subscribe(serviceType);
-    }
-  }, this);
 };
 
 WemoClient.prototype.unsubscribe = function(serviceType) {
@@ -215,9 +223,8 @@ WemoClient.prototype.unsubscribe = function(serviceType) {
     }
   };
 
-  var req = http.request(options, function(res) {
-    this.subscriptions[serviceType] = undefined;
-  }.bind(this));
+  this.subscriptions[serviceType] = undefined;
+  var req = http.request(options);
   req.end();
 };
 
@@ -233,38 +240,36 @@ WemoClient.prototype.handleCallback = function(json) {
   if (json['e:propertyset']['e:property'][0]['StatusChange']) {
     xml2js.parseString(json['e:propertyset']['e:property'][0]['StatusChange'][0], function (err, xml) {
       if (!err && xml) {
-        self.emit('StatusChange', {
-          DeviceId: xml.StateEvent.DeviceID[0]._,
-          CapabilityId: xml.StateEvent.CapabilityId[0],
-          Value: xml.StateEvent.Value[0]
-        });
+        self.emit('statusChange',
+          xml.StateEvent.DeviceID[0]._, // device id
+          xml.StateEvent.CapabilityId[0], // capability id
+          xml.StateEvent.Value[0] // value
+        );
       }
     });
   } else if (json['e:propertyset']['e:property'][0]['BinaryState']) {
-    var binaryState = {
-      BinaryState: json['e:propertyset']['e:property'][0]['BinaryState'][0]
-    }
-    self.emit('BinaryState', binaryState);
+    self.emit('binaryState', json['e:propertyset']['e:property'][0]['BinaryState'][0]);
   } else if (json['e:propertyset']['e:property'][0]['InsightParams']) {
     var params = json['e:propertyset']['e:property'][0]['InsightParams'][0].split('|');
     var insightParams = {
-      BinaryState: params[0],
       ONSince: params[1],
       OnFor: params[2],
-      TodayONTime: params[3],
-      InstantPower: params[7]
+      TodayONTime: params[3]
     };
-    self.emit('InsightParams', insightParams);
+    self.emit('insightParams',
+      params[0], // binary state
+      params[7], // instant power
+      insightParams
+    );
   } else if (json['e:propertyset']['e:property'][0]['attributeList']) {
     xml2js.parseString(json['e:propertyset']['e:property'][0]['attributeList'][0], function (err, xml) {
       if (!err && xml) {
-        var attributeList = {
-          name: xml.attribute.name[0],
-          value: xml.attribute.value[0],
-          prevalue: xml.attribute.prevalue[0],
-          ts: xml.attribute.ts[0]
-        }
-        self.emit('AttributeList', attributeList);
+        self.emit('attributeList',
+          xml.attribute.name[0], // name
+          xml.attribute.value[0], // value
+          xml.attribute.prevalue[0], // previous value
+          xml.attribute.ts[0] // timestamp
+        );
       }
     });
   } else {

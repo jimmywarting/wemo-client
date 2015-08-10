@@ -8,14 +8,11 @@ function foundDevice(deviceInfo){
   // Get the client for the found device
   var client = wemo.client(deviceInfo);
 
-  // Handle BinaryState events
-  client.on('BinaryState', function(event){
-    console.log('Binary State changed: %j', event);
+  // Handle binaryState events
+  client.on('binaryState', function(value){
+    console.log('Binary State changed: %s', value);
   });
 
-  // Subscribe to receive events from the device
-  client.subscribe();
-  
   // Turn the switch on
   client.setBinaryState(1);
 }
