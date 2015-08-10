@@ -139,6 +139,10 @@ WemoClient.prototype.setBinaryState = function(value) {
 };
 
 WemoClient.prototype.subscribe = function(serviceType) {
+  if (!serviceType) {
+    this._subscribeAll();
+    return;
+  }
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
@@ -166,7 +170,7 @@ WemoClient.prototype.subscribe = function(serviceType) {
       setTimeout(renewSubscription.bind(this), 12 * 1000, serviceType);
     }.bind(this));
     req.end();
-  }
+  };
 
   var callbackURL = this.callbackURL + '/' + this.UDN;
   options.headers.CALLBACK = '<' + callbackURL + '>';
@@ -179,7 +183,23 @@ WemoClient.prototype.subscribe = function(serviceType) {
   req.end();
 };
 
+WemoClient.prototype._subscribeAll = function() {
+  var serviceTypes = [
+    'urn:Belkin:service:basicevent:1',
+    'urn:Belkin:service:insight:1'
+  ];
+  serviceTypes.forEach(function(serviceType){
+    if (this.services[serviceType]) {
+      this.subscribe(serviceType);
+    }
+  }, this);
+};
+
 WemoClient.prototype.unsubscribe = function(serviceType) {
+  if (!serviceType) {
+    this._unsubscribeAll();
+    return;
+  }
   if (!this.subscriptions[serviceType]) {
     // No subscription active for this serviceType
     return;
@@ -199,6 +219,12 @@ WemoClient.prototype.unsubscribe = function(serviceType) {
     this.subscriptions[serviceType] = undefined;
   }.bind(this));
   req.end();
+};
+
+WemoClient.prototype._unsubscribeAll = function() {
+  for (var serviceType in this.subscriptions) {
+    this.unsubscribe(serviceType);
+  }
 };
 
 // TODO: Refactor the callback handler.

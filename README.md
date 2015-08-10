@@ -30,13 +30,18 @@ var wemo = new Wemo();
 wemo.discover(function(deviceInfo){
   console.log('Wemo Device Found: %j', deviceInfo);
 
+  // Get the client for the found device
   var client = wemo.client(deviceInfo);
 
+  // Handle BinaryState events
   client.on('BinaryState', function(event){
     console.log('Binary State changed: %j', event);
   });
 
-  client.subscribe('urn:Belkin:service:basicevent:1');
+  // Subscribe to receive events from the device
+  client.subscribe();
+
+  // Turn the switch on
   client.setBinaryState(1);
 });
 ```
