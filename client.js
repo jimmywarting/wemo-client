@@ -14,6 +14,7 @@ var WemoClient = module.exports = function(config) {
   this.subscriptions = {};
   this.callbackURL = config.callbackURL;
   this.device = config;
+  this.debug = false;
 
   // Create map of services
   config.serviceList.service.forEach(function(service){
@@ -275,7 +276,8 @@ WemoClient.prototype.handleCallback = function(json) {
       }
     });
   } else {
-    console.log('Unhandled Event: %j', json);
-    console.log(json['e:propertyset']['e:property'][0]);
+    if (self.debug) {
+      console.log('Unhandled Event: %j', json);
+    }
   }
 };
