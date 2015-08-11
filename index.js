@@ -6,6 +6,7 @@ var url = require('url');
 var express = require('express');
 var bodyparser = require('body-parser');
 var os = require('os');
+var debug = require('debug')('wemo-client');
 
 var WemoClient = require('./client');
 
@@ -30,9 +31,11 @@ Wemo.prototype.discover = function(cb) {
             for (var key in json.root.device[0]) {
               device[key] = json.root.device[0][key][0];
             }
-            if (cb) {
-              // Return only matching devices and return them only once!
-              if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
+
+            // Return only matching devices and return them only once!
+            if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
+              debug('Found device: %j', json);
+              if (cb) {
                 cb.call(self, device);
               }
             }

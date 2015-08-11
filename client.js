@@ -2,6 +2,7 @@ var util = require('util');
 var http = require('http');
 var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
+var debug = require('debug')('wemo-client');
 
 var WemoClient = module.exports = function(config) {
   EventEmitter.call(this);
@@ -14,7 +15,6 @@ var WemoClient = module.exports = function(config) {
   this.subscriptions = {};
   this.callbackURL = config.callbackURL;
   this.device = config;
-  this.debug = false;
 
   // Create map of services
   config.serviceList.service.forEach(function(service){
@@ -276,8 +276,6 @@ WemoClient.prototype.handleCallback = function(json) {
       }
     });
   } else {
-    if (self.debug) {
-      console.log('Unhandled Event: %j', json);
-    }
+    debug('Unhandled Event: %j', json);
   }
 };

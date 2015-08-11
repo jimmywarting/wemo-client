@@ -15,7 +15,7 @@ Low-level client library for controlling Wemo Devices. Supports event subscripti
 
 ## Install
 
-```
+```bash
 $ npm install wemo-client
 ```
 
@@ -109,6 +109,14 @@ Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 * **String** *deviceId* Id of the device connected to the bridge
 * **String** *capability* Capability
 * **String** *value* Value
+
+## Debugging
+
+Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `wemo-client`.
+
+```bash
+$ env DEBUG=wemo-client node examples/index.js
+```
 
 ## Credits
 
