@@ -34,8 +34,8 @@
     "events": "~1.0.2"
   },
   "devDependencies": {
-    "should": "~7.0.3",
     "mocha": "~2.2.5",
-    "http": "0.0.0"
+    "must": "~0.12.0",
+    "mitm": "~1.1.0"
   }
 }
