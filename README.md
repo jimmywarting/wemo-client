@@ -15,7 +15,7 @@ Low-level client library for controlling Wemo Devices. Supports event subscripti
 
 ## Install
 
-```bash
+```
 $ npm install wemo-client
 ```
 
@@ -96,11 +96,12 @@ Wemo Insight Switch sent new power consumption data.
 * **String** *instantPower* Current power consumption in mW
 * **Object** *data* Aggregated usage data
 
-#### setBinaryState(value)
+#### setBinaryState(value, cb)
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
 * **String** *value* `1` = on, `0` = off
+* **Callback** *cb* cb(err, data)
 
 #### setDeviceStatus(deviceId, capability, value)
 
@@ -109,14 +110,6 @@ Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 * **String** *deviceId* Id of the device connected to the bridge
 * **String** *capability* Capability
 * **String** *value* Value
-
-## Debugging
-
-Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `wemo-client`.
-
-```bash
-$ env DEBUG=wemo-client node examples/index.js
-```
 
 ## Credits
 
