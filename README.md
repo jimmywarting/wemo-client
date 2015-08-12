@@ -96,11 +96,12 @@ Wemo Insight Switch sent new power consumption data.
 * **String** *instantPower* Current power consumption in mW
 * **Object** *data* Aggregated usage data
 
-#### setBinaryState(value)
+#### setBinaryState(value, cb)
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
 * **String** *value* `1` = on, `0` = off
+* **Callback** *cb* cb(err, data)
 
 #### setDeviceStatus(deviceId, capability, value)
 

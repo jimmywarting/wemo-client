@@ -66,6 +66,9 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
       }
     });
     res.on('error', function(err) {
+      if (cb) {
+        cb(err);
+      }
       console.log(err);
     });
   });
@@ -142,13 +145,13 @@ WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value) {
   this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value));
 };
 
-WemoClient.prototype.setBinaryState = function(value) {
+WemoClient.prototype.setBinaryState = function(value, cb) {
   var body = [
     '<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">',
     '<BinaryState>%s</BinaryState>',
     '</u:SetBinaryState>'
   ].join('\n');
-  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value));
+  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
 };
 
 WemoClient.prototype._onListenerAdded = function(eventName) {
