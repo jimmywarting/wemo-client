@@ -1,5 +1,4 @@
 var Wemo = require('../index');
-
 var wemo = new Wemo();
 
 function foundDevice(device){
