@@ -145,9 +145,7 @@ WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value) {
 };
 
 WemoClient.prototype.setBinaryState = function(value, cb) {
-  var body = [
-    '<BinaryState>%s</BinaryState>'
-  ].join('\n');
+  var body = '<BinaryState>%s</BinaryState>';
   this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
 };
 
