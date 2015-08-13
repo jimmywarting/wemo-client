@@ -41,6 +41,7 @@ WemoClient.EventServices = {
 
 WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
   var soapHeader = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>';
+  var soapBody = util.format('<u:%s xmlns:u="%s">%s</u:%s>', action, serviceType, body, action);
   var soapFooter = '</s:Body></s:Envelope>';
 
   var options = {
@@ -73,7 +74,7 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
     });
   });
   req.write(soapHeader);
-  req.write(body);
+  req.write(soapBody);
   req.write(soapFooter);
   req.end();
 };
@@ -129,27 +130,23 @@ WemoClient.prototype.getEndDevices = function(cb) {
     });
   };
 
-  var body = '<u:GetEndDevices xmlns:u="urn:Belkin:service:bridge:1"><DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType></u:GetEndDevices>';
+  var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
   this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
 };
 
 WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value) {
   var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
   var body = [
-    '<u:SetDeviceStatus xmlns:u="urn:Belkin:service:bridge:1">',
     '<DeviceStatusList>',
     '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;%s&lt;/IsGroupAction&gt;&lt;DeviceID available=&quot;YES&quot;&gt;%s&lt;/DeviceID&gt;&lt;CapabilityID&gt;%s&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;%s&lt;/CapabilityValue&gt;&lt;/DeviceStatus&gt;',
-    '</DeviceStatusList>',
-    '</u:SetDeviceStatus>'
+    '</DeviceStatusList>'
   ].join('\n');
   this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value));
 };
 
 WemoClient.prototype.setBinaryState = function(value, cb) {
   var body = [
-    '<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">',
-    '<BinaryState>%s</BinaryState>',
-    '</u:SetBinaryState>'
+    '<BinaryState>%s</BinaryState>'
   ].join('\n');
   this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
 };

@@ -7,7 +7,7 @@
     "examples": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha test/index.js"
   },
   "repository": {
     "type": "git",
@@ -33,5 +33,10 @@
     "http": "0.0.0",
     "events": "~1.0.2",
     "debug": "~2.2.0"
+  },
+  "devDependencies": {
+    "mocha": "~2.2.5",
+    "must": "~0.12.0",
+    "mitm": "~1.1.0"
   }
 }
