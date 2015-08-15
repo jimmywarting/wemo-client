@@ -163,10 +163,6 @@ WemoClient.prototype.subscribe = function(serviceType) {
   if (!this.callbackURL) {
     throw new Error('No callbackURL given!');
   }
-  if (this.subscriptions[serviceType]) {
-    // Subscription already active
-    return;
-  }
 
   var options = {
     host: this.host,
@@ -178,52 +174,21 @@ WemoClient.prototype.subscribe = function(serviceType) {
     }
   };
 
-  var renewSubscription = function() {
-    if (!this.subscriptions[serviceType]) {
-      // Subscription not active for this serviceType
-      return;
-    }
-    options.headers.SID = this.subscriptions[serviceType];
-    var req = http.request(options, function(res) {
-      setTimeout(renewSubscription.bind(this), 12 * 1000, serviceType);
-    }.bind(this));
-    req.end();
-  };
-
-  var callbackURL = this.callbackURL + '/' + this.UDN;
-  options.headers.CALLBACK = '<' + callbackURL + '>';
-  options.headers.NT = 'upnp:event';
-
-  this.subscriptions[serviceType] = true;
-  var req = http.request(options, function(res) {
-    this.subscriptions[serviceType] = res.headers.sid;
-    setTimeout(renewSubscription.bind(this), 12 * 1000, serviceType);
-  }.bind(this));
-  req.end();
-};
-
-WemoClient.prototype.unsubscribe = function(serviceType) {
-  if (!serviceType) {
-    this._unsubscribeAll();
-    return;
-  }
   if (!this.subscriptions[serviceType]) {
-    // No subscription active for this serviceType
-    return;
+    // Initial subscription
+    options.headers.CALLBACK = '<' + this.callbackURL + '/' + this.UDN + '>';
+    options.headers.NT = 'upnp:event';
+  } else {
+    // Subscription renewal
+    options.headers.SID = this.subscriptions[serviceType];
   }
 
-  var options = {
-    host: this.host,
-    port: this.port,
-    path: this.services[serviceType].eventSubURL,
-    method: 'UNSUBSCRIBE',
-    headers: {
-      SID: this.subscriptions[serviceType]
+  var req = http.request(options, function(res) {
+    if (res.headers.sid) {
+      this.subscriptions[serviceType] = res.headers.sid;
     }
-  };
-
-  this.subscriptions[serviceType] = undefined;
-  var req = http.request(options);
+    setTimeout(this.subscribe.bind(this), 120 * 1000, serviceType);
+  }.bind(this));
   req.end();
 };
 
