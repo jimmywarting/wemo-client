@@ -176,10 +176,12 @@ WemoClient.prototype.subscribe = function(serviceType) {
 
   if (!this.subscriptions[serviceType]) {
     // Initial subscription
+    debug('Initial subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.CALLBACK = '<' + this.callbackURL + '/' + this.UDN + '>';
     options.headers.NT = 'upnp:event';
   } else {
     // Subscription renewal
+    debug('Renewing subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.SID = this.subscriptions[serviceType];
   }
 
