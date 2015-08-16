@@ -1,17 +1,14 @@
 # Wemo Client for Node.js
 
-Low-level client library for controlling Wemo Devices. Supports event subscriptions and recent Wemo models like Bridge and Bulb.
+Low-level client library for controlling recent Wemo devices including Bulbs. Supports event subscriptions to get live updates from devices.
 
-## Supported Devices
+## Supported Wemo Devices
 
-  * [x] Wemo Switch
-  * [x] Wemo Motion
-  * [x] Wemo Insight Switch
-  * [x] Wemo Maker
-  * [x] Wemo Light Bulb
-  * [ ] Osram Lightify TW
-  * [ ] Osram Flex RGBW
-  * [ ] Osram Gardenspot RGB
+  * [x] Switch
+  * [x] Motion
+  * [x] Insight Switch
+  * [x] Maker
+  * [x] Link (for Bulbs)
 
 ## Install
 
