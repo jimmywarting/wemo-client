@@ -108,6 +108,11 @@ Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 * **String** *capability* Capability
 * **String** *value* Value
 
+Known capabilities (depends on device):
+
+* **10006** Turn bulb on/off. Values: `1` = on, `0` = off
+* **10008** Dim bulb. Value: `brightness:transition_time`, where `brightness` = 0-255
+
 ## Debugging
 
 Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `wemo-client`.
