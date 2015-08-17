@@ -15,7 +15,7 @@
     "url": "git://github.com/timonreinhard/wemo-client.git"
   },
   "author": "Timon Reinhard",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/timonreinhard/wemo-client/issues"
   },

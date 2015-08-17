@@ -121,10 +121,14 @@ Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with
 $ env DEBUG=wemo-client node examples/index.js
 ```
 
+## Contributing
+
+Contributions are very welcome! Please note that by submitting a pull request for this project, you agree to license your contribution under the [MIT License](https://github.com/timonreinhard/wemo-client/blob/master/LICENSE) to this project.
+
 ## Credits
 
 Credit goes to [Ben Hardill](http://www.hardill.me.uk/wordpress/tag/wemo/) for his research on Belkin Wemo devices.
 
 ## License
 
-Published under the [ISC License](https://github.com/timonreinhard/wemo-client/blob/master/LICENSE).
+Published under the [MIT License](https://github.com/timonreinhard/wemo-client/blob/master/LICENSE).
