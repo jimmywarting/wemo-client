@@ -17,7 +17,7 @@ var WemoClient = module.exports = function(config) {
   this.device = config;
 
   // Create map of services
-  config.serviceList.service.forEach(function(service){
+  config.serviceList.service.forEach(function(service) {
     this[service.serviceType[0]] = {
       serviceId: service.serviceId[0],
       controlURL: service.controlURL[0],

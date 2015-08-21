@@ -1,7 +1,7 @@
 var Wemo = require('../index');
 var wemo = new Wemo();
 
-function foundDevice(deviceInfo){
+function foundDevice(deviceInfo) {
   console.log('Wemo Device Found: %s (%s)',
     deviceInfo.friendlyName, deviceInfo.deviceType);
 
@@ -9,7 +9,7 @@ function foundDevice(deviceInfo){
   var client = wemo.client(deviceInfo);
 
   // Handle binaryState events
-  client.on('binaryState', function(value){
+  client.on('binaryState', function(value) {
     var states = {
       0: 'off',
       1: 'on',
@@ -24,6 +24,6 @@ function foundDevice(deviceInfo){
 wemo.discover(foundDevice);
 
 // Repeat discovery as some devices may appear late
-setInterval(function(){
+setInterval(function() {
   wemo.discover(foundDevice);
 }, 15000);

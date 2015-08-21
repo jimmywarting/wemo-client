@@ -55,7 +55,7 @@ Wemo.prototype._listen = function() {
   var app = express();
   app.use(bodyparser.raw({type: 'text/xml'}));
   app.all('/:udn', function(req, res) {
-    xml2js.parseString(req.body, function(err, json){
+    xml2js.parseString(req.body, function(err, json) {
       if (err) {
         console.log(err);
         res.sendStatus(500);
