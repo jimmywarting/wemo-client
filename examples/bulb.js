@@ -6,7 +6,7 @@ function foundDevice(deviceInfo) {
     console.log('Wemo Bridge found: %s', deviceInfo.friendlyName);
 
     var client = this.client(deviceInfo);
-    client.getEndDevices(function(err, endDevices){
+    client.getEndDevices(function(err, endDevices) {
       if (!err) {
         console.log('Bulbs found: %j', endDevices);
       }
