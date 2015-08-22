@@ -97,6 +97,8 @@ Wemo Insight Switch sent new power consumption data.
 
 Get bulbs connected to a Wemo Bridge. `cb(err, endDevices)` is called for every device found, where `endDevices` is an array of device objects having `friendlyName`, `deviceId`, `currentState` and `capabilites`.
 
+* **Callback** *cb* cb(err, endDevices)
+
 #### setBinaryState(value, cb)
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
