@@ -93,6 +93,10 @@ Wemo Insight Switch sent new power consumption data.
 * **String** *instantPower* Current power consumption in mW
 * **Object** *data* Aggregated usage data
 
+#### getEndDevices(cb)
+
+Get bulbs connected to a Wemo Bridge. `cb(err, endDevice)` is called for every device found, where `endDevice` is an object containing `friendlyName`, `deviceId`, `currentState` and `capabilites`.
+
 #### setBinaryState(value, cb)
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
