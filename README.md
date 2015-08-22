@@ -95,7 +95,7 @@ Wemo Insight Switch sent new power consumption data.
 
 #### getEndDevices(cb)
 
-Get bulbs connected to a Wemo Bridge. `cb(err, endDevices)` is called for every device found, where `endDevices` is an array of device objects having `friendlyName`, `deviceId`, `currentState` and `capabilites`.
+Get bulbs connected to a Wemo Bridge. An array of `endDevices` is passed to the callback.
 
 * **Callback** *cb* cb(err, endDevices)
 
