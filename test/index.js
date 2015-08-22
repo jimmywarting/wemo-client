@@ -1,9 +1,10 @@
-var must = require('must');
+var fs = require('fs');
+var demand = require('must');
 var http = require('http');
 var Mitm = require('mitm');
 
 var Wemo = require('../index');
-var deviceInfo = require('./mocks/deviceinfo.json');
+var deviceInfo = require('./fixtures/deviceinfo.json');
 
 describe('Wemo', function(){
 
@@ -71,7 +72,7 @@ describe('WemoClient', function(){
     });
   });
 
-  describe('#setBinaryState()', function(){
+  describe('#setBinaryState(val)', function(){
     it('must send a BinaryState request', function(done){
       mitm.on('request', function(req, res) {
         var data = '';
@@ -85,6 +86,21 @@ describe('WemoClient', function(){
         res.end();
       });
       client.setBinaryState(1, done);
+    });
+  });
+
+  describe('#getEndDevices(err, cb)', function(){
+    it('must handle device groups', function(done){
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getEndDevices_group.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getEndDevices(function(err, endDevices){
+        demand(err).to.be.falsy();
+        demand(endDevices).to.be.an.array();
+        done();
+      });
     });
   });
 

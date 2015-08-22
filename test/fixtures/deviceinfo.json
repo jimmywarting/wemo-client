@@ -45,6 +45,12 @@
       "eventSubURL": ["/upnp/event/basicevent1"],
       "SCPDURL": ["/eventservice.xml"]
   }, {
+      "serviceType": ["urn:Belkin:service:bridge:1"],
+      "serviceId": ["urn:Belkin:serviceId:bridge1"],
+      "controlURL": ["/upnp/control/bridge1"],
+      "eventSubURL": ["/upnp/event/bridge1"],
+      "SCPDURL": ["/bridge.xml"]
+  }, {
       "serviceType": ["urn:Belkin:service:firmwareupdate:1"],
       "serviceId": ["urn:Belkin:serviceId:firmwareupdate1"],
       "controlURL": ["/upnp/control/firmwareupdate1"],
