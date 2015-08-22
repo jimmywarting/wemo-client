@@ -102,8 +102,8 @@ WemoClient.prototype.getEndDevices = function(cb) {
                   capabilities: devinfo[i].CapabilityIDs[0].split(',')
                 };
                 device.internalState = {};
-                for (var i = 0; i < device.capabilities.length; i++) {
-                  device.internalState[device.capabilities[i]] = device.currentState[i];
+                for (var k = 0; k < device.capabilities.length; k++) {
+                  device.internalState[device.capabilities[k]] = device.currentState[k];
                 }
                 endDevices.push(device);
               }
@@ -118,8 +118,8 @@ WemoClient.prototype.getEndDevices = function(cb) {
                   capabilities: groupinfos[i].GroupInfo[0].GroupCapabilityIDs[0].split(',')
                 };
                 device.internalState = {};
-                for (var i = 0; i < device.capabilities.length; i++) {
-                  device.internalState[device.capabilities[i]] = device.currentState[i];
+                for (var k = 0; k < device.capabilities.length; k++) {
+                  device.internalState[device.capabilities[k]] = device.currentState[k];
                 }
                 endDevices.push(device);
               }

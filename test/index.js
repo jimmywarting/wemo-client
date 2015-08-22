@@ -90,7 +90,7 @@ describe('WemoClient', function(){
   });
 
   describe('#getEndDevices(err, cb)', function(){
-    it('must handle device groups', function(done){
+    it('must handle grouped bulbs', function(done){
       mitm.on('request', function(req, res) {
         var fixture = fs.readFileSync(__dirname + '/fixtures/getEndDevices_group.xml');
         res.write(fixture);
@@ -99,6 +99,25 @@ describe('WemoClient', function(){
       client.getEndDevices(function(err, endDevices){
         demand(err).to.be.falsy();
         demand(endDevices).to.be.an.array();
+        demand(endDevices).to.have.length(2);
+        endDevices[0].friendlyName.must.be('First');
+        endDevices[1].friendlyName.must.be('Second');
+        done();
+      });
+    });
+
+    it('must handle single bulbs', function(done){
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getEndDevices_single.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getEndDevices(function(err, endDevices){
+        demand(err).to.be.falsy();
+        demand(endDevices).to.be.an.array();
+        demand(endDevices).to.have.length(2);
+        endDevices[0].friendlyName.must.be('First');
+        endDevices[1].friendlyName.must.be('Second');
         done();
       });
     });
