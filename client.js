@@ -85,6 +85,8 @@ WemoClient.prototype.getEndDevices = function(cb) {
   // TODO: Refactor parsing and group handling
   var parseResponse = function(err, data) {
     if (err) cb(err);
+    debug('Response to getEndDevices', data);
+    var endDevices = [];
     xml2js.parseString(data, function(err, result) {
       if (!err) {
         var list = result['s:Envelope']['s:Body'][0]['u:GetEndDevicesResponse'][0].DeviceLists[0];
@@ -103,7 +105,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
                 for (var i = 0; i < device.capabilities.length; i++) {
                   device.internalState[device.capabilities[i]] = device.currentState[i];
                 }
-                cb(null, device);
+                endDevices.push(device);
               }
             }
             var groupinfos = result2.DeviceLists.DeviceList[0].GroupInfos;
@@ -119,13 +121,16 @@ WemoClient.prototype.getEndDevices = function(cb) {
                 for (var i = 0; i < device.capabilities.length; i++) {
                   device.internalState[device.capabilities[i]] = device.currentState[i];
                 }
-                cb(null, device);
+                endDevices.push(device);
               }
             }
           } else {
             console.log(err, data);
           }
         });
+        cb(null, endDevices);
+      } else {
+        cb(err);
       }
     });
   };
