@@ -118,6 +118,7 @@ Known capabilities (depends on device):
 
 * **10006** Turn bulb on/off. Values: `1` = on, `0` = off
 * **10008** Dim bulb. Value: `brightness:transition_time`, where `brightness` = 0-255
+* **30008** Sleep timer. Value: `seconds*10:current_unixtime`
 
 ## Debugging
 
