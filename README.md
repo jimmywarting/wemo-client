@@ -48,6 +48,13 @@ Discover Wemo devices via UPnP. A `deviceInfo` will be passed to `cb` that can b
 
 * **Callback** *cb* Callback called for every single device found.
 
+#### load(deviceInfoUrl, cb)
+
+Allows to skip discovery if the `deviceInfoUrl` of a Wemo is already known.
+
+* **String** *deviceInfoUrl* Must point to setup.xml of the requested device (`http://device_ip:device_port/setup.xml`)
+* **Callback** *cb* Callback called for every single device found.
+
 #### client(deviceInfo)
 
 Get a single instance of [WemoClient](#wemoclient) for the device specified by `deviceInfo`.

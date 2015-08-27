@@ -49,7 +49,7 @@ Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
     self.load(msg.LOCATION, cb);
- };
+  };
 
   var ssdpClient = new SSDPClient();
   ssdpClient.on('response', handleResponse);
