@@ -15,17 +15,17 @@ var Wemo = module.exports = function() {
   this._listen();
 };
 
-Wemo.prototype.load = function(deviceInfoUrl, cb) {
+Wemo.prototype.load = function(setupUrl, cb) {
   var self = this;
-  request.get(deviceInfoUrl, function(err, res, xml) {
+  request.get(setupUrl, function(err, res, xml) {
     if (!err) {
       xml2js.parseString(xml, function(err, json) {
         if (!err) {
-          var location = url.parse(deviceInfoUrl);
+          var location = url.parse(setupUrl);
           var device = {
-            deviceInfoURL: deviceInfoUrl,
             host: location.hostname,
             port: location.port,
+            setupURL: setupUrl,
             callbackURL: self.getCallbackURL()
           };
           for (var key in json.root.device[0]) {
