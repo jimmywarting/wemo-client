@@ -15,35 +15,41 @@ var Wemo = module.exports = function() {
   this._listen();
 };
 
+Wemo.prototype.load = function(deviceInfoUrl, cb) {
+  var self = this;
+  request.get(deviceInfoUrl, function(err, res, xml) {
+    if (!err) {
+      xml2js.parseString(xml, function(err, json) {
+        if (!err) {
+          var location = url.parse(deviceInfoUrl);
+          var device = {
+            deviceInfoURL: deviceInfoUrl,
+            host: location.hostname,
+            port: location.port,
+            callbackURL: self.getCallbackURL()
+          };
+          for (var key in json.root.device[0]) {
+            device[key] = json.root.device[0][key][0];
+          }
+
+          // Return only matching devices and return them only once!
+          if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
+            debug('Found device: %j', json);
+            if (cb) {
+              cb.call(self, device);
+            }
+          }
+        }
+      });
+    }
+  });
+};
+
 Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
-    request.get(msg.LOCATION, function(err, res, xml) {
-      if (!err) {
-        xml2js.parseString(xml, function(err, json) {
-          if (!err) {
-            var location = url.parse(msg.LOCATION);
-            var device = {
-              host: location.hostname,
-              port: location.port,
-              callbackURL: self.getCallbackURL()
-            };
-            for (var key in json.root.device[0]) {
-              device[key] = json.root.device[0][key][0];
-            }
-
-            // Return only matching devices and return them only once!
-            if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
-              debug('Found device: %j', json);
-              if (cb) {
-                cb.call(self, device);
-              }
-            }
-          }
-        });
-      }
-    });
-  };
+    self.load(msg.LOCATION, cb);
+ };
 
   var ssdpClient = new SSDPClient();
   ssdpClient.on('response', handleResponse);
