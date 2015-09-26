@@ -15,6 +15,14 @@ var Wemo = module.exports = function() {
   this._listen();
 };
 
+Wemo.DEVICE_TYPE = {
+  Bridge: 'urn:Belkin:device:bridge:1',
+  Switch: 'urn:Belkin:device:controllee:1',
+  Motion: 'urn:Belkin:device:sensor:1',
+  Maker: 'urn:Belkin:device:Maker:1',
+  Insight: 'urn:Belkin:device:insight:1'
+};
+
 Wemo.prototype.load = function(setupUrl, cb) {
   var self = this;
   request.get(setupUrl, function(err, res, xml) {

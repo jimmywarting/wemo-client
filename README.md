@@ -42,6 +42,10 @@ wemo.discover(function(deviceInfo) {
 
 ### Wemo
 
+#### DEVICE_TYPE
+
+Static map of supported models and device types.
+
 #### discover(cb)
 
 Discover Wemo devices via UPnP. A `deviceInfo` will be passed to `cb` that can be used to get a client for the device found.

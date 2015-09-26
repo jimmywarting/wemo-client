@@ -2,7 +2,7 @@ var Wemo = require('../index');
 var wemo = new Wemo();
 
 function foundDevice(device) {
-  if (device.deviceType === 'urn:Belkin:device:insight:1') {
+  if (device.deviceType === Wemo.DEVICE_TYPE.Insight) {
     console.log('Wemo Insight Switch found: %s', device.friendlyName);
 
     var client = this.client(device);

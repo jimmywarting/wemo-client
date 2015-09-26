@@ -2,7 +2,7 @@ var Wemo = require('../index');
 var wemo = new Wemo();
 
 function foundDevice(device) {
-  if (device.deviceType === 'urn:Belkin:device:Maker:1') {
+  if (device.deviceType === Wemo.DEVICE_TYPE.Maker) {
     console.log('Wemo Maker found: %s', device.friendlyName);
 
     var client = this.client(device);

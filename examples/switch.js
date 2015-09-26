@@ -2,7 +2,7 @@ var Wemo = require('../index');
 var wemo = new Wemo();
 
 function foundDevice(device) {
-  if (device.deviceType === 'urn:Belkin:device:controllee:1') {
+  if (device.deviceType === Wemo.DEVICE_TYPE.Switch) {
     console.log('Wemo Switch found: %s', device.friendlyName);
 
     var state = 'off';
