@@ -80,9 +80,6 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
 };
 
 WemoClient.prototype.getEndDevices = function(cb) {
-  var self = this;
-
-  // TODO: Refactor parsing and group handling
   var parseResponse = function(err, data) {
     if (err) cb(err);
     debug('Response to getEndDevices', data);
@@ -92,37 +89,13 @@ WemoClient.prototype.getEndDevices = function(cb) {
         var list = result['s:Envelope']['s:Body'][0]['u:GetEndDevicesResponse'][0].DeviceLists[0];
         xml2js.parseString(list, function(err, result2) {
           if (!err) {
-            var devinfo = result2.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
-            if (devinfo) {
-              for (var i = 0; i < devinfo.length; i++) {
-                var device = {
-                  friendlyName: devinfo[i].FriendlyName[0],
-                  deviceId: devinfo[i].DeviceID[0],
-                  currentState: devinfo[i].CurrentState[0].split(','),
-                  capabilities: devinfo[i].CapabilityIDs[0].split(',')
-                };
-                device.internalState = {};
-                for (var k = 0; k < device.capabilities.length; k++) {
-                  device.internalState[device.capabilities[k]] = device.currentState[k];
-                }
-                endDevices.push(device);
-              }
+            var deviceInfos = result2.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
+            if (deviceInfos) {
+              Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
             }
-            var groupinfos = result2.DeviceLists.DeviceList[0].GroupInfos;
-            if (groupinfos) {
-              for (var i = 0; i < groupinfos.length; i++) {
-                var device = {
-                  friendlyName: groupinfos[i].GroupInfo[0].GroupName[0],
-                  deviceId: groupinfos[i].GroupInfo[0].GroupID[0],
-                  currentState: groupinfos[i].GroupInfo[0].GroupCapabilityValues[0].split(','),
-                  capabilities: groupinfos[i].GroupInfo[0].GroupCapabilityIDs[0].split(',')
-                };
-                device.internalState = {};
-                for (var k = 0; k < device.capabilities.length; k++) {
-                  device.internalState[device.capabilities[k]] = device.currentState[k];
-                }
-                endDevices.push(device);
-              }
+            var groupInfos = result2.DeviceLists.DeviceList[0].GroupInfos;
+            if (groupInfos) {
+              Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
             }
           } else {
             console.log(err, data);
@@ -133,6 +106,42 @@ WemoClient.prototype.getEndDevices = function(cb) {
         cb(err);
       }
     });
+  };
+
+  var parseDeviceInfo = function(data) {
+    var device = {};
+
+    if (data.GroupInfo) {
+      // treat device group as single device
+      device.friendlyName = data.GroupInfo[0].GroupName[0];
+      device.deviceId = data.GroupInfo[0].GroupID[0];
+      device.currentState = data.GroupInfo[0].GroupCapabilityValues[0];
+      device.capabilities = data.GroupInfo[0].GroupCapabilityIDs[0];
+    } else {
+      // single device
+      device.friendlyName = data.FriendlyName[0];
+      device.deviceId = data.DeviceID[0];
+      device.currentState = data.CurrentState[0];
+      device.capabilities = data.CapabilityIDs[0];
+    }
+
+    // process device state
+    device.currentState = device.currentState.split(',');
+    device.capabilities = device.capabilities.split(',');
+    device.internalState = {};
+    for (var i = 0; i < device.capabilities.length; i++) {
+      device.internalState[device.capabilities[i]] = device.currentState[i];
+    }
+
+    // set device type
+    if (device.capabilities.indexOf('10008') !== -1) {
+      device.deviceType = 'dimmableLight';
+    }
+    if (device.capabilities.indexOf('10300') !== -1) {
+      device.deviceType = 'colorLight';
+    }
+
+    return device;
   };
 
   var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
