@@ -158,6 +158,11 @@ WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value) {
   this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value));
 };
 
+WemoClient.prototype.setLightColor = function(deviceId, red, green, blue) {
+  var color = WemoClient.rgb2xy(red, green, blue);
+  this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0');
+};
+
 WemoClient.prototype.setBinaryState = function(value, cb) {
   var body = '<BinaryState>%s</BinaryState>';
   this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
@@ -257,4 +262,31 @@ WemoClient.prototype.handleCallback = function(json) {
   } else {
     debug('Unhandled Event: %j', json);
   }
+};
+
+// Based on https://github.com/theycallmeswift/hue.js/blob/master/lib/helpers.js
+// TODO: Needs to be tweaked for more accurate color representation
+WemoClient.rgb2xy = function(red, green, blue) {
+  var xyz;
+  var rgb = [red / 255, green / 255, blue / 255];
+
+  for (var i = 0; i < 3; i++) {
+    if (rgb[i] > 0.04045) {
+      rgb[i] = Math.pow(((rgb[i] + 0.055) / 1.055), 2.4);
+    } else {
+      rgb[i] /= 12.92;
+    }
+    rgb[i] = rgb[i] * 100;
+  }
+
+  xyz = [
+    rgb[0] * 0.4124 + rgb[1] * 0.3576 + rgb[2] * 0.1805,
+    rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722,
+    rgb[0] * 0.0193 + rgb[1] * 0.1192 + rgb[2] * 0.9505
+  ];
+
+  return [
+    xyz[0] / (xyz[0] + xyz[1] + xyz[2]) * 65535,
+    xyz[1] / (xyz[0] + xyz[1] + xyz[2]) * 65535
+  ];
 };

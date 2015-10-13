@@ -2,13 +2,16 @@
 
 Low-level client library for controlling recent Wemo devices including Bulbs. Supports event subscriptions to get live updates from devices.
 
-## Supported Wemo Devices
+## Supported Devices
 
-  * [x] Switch
-  * [x] Motion
-  * [x] Insight Switch
-  * [x] Maker
-  * [x] Link (for Bulbs)
+  * [x] Wemo Switch
+  * [x] Wemo Motion
+  * [x] Wemo Insight Switch
+  * [x] Wemo Maker
+  * [x] Wemo LED Bulb
+  * [x] OSRAM Lightify Flex RGBW
+  * [ ] OSRAM Lightify Tunable White
+  * [ ] OSRAM Gardenspot Mini RGB
 
 ## Install
 
@@ -45,6 +48,12 @@ wemo.discover(function(deviceInfo) {
 #### DEVICE_TYPE
 
 Static map of supported models and device types.
+
+* Bridge
+* Switch
+* Motion
+* Maker
+* Insight
 
 #### discover(cb)
 
@@ -121,7 +130,7 @@ Turn the device on or off. Will also cause a `binaryState` event to be triggered
 
 Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 
-* **String** *deviceId* Id of the device connected to the bridge
+* **String** *deviceId* Id of the device connected to the bridge (determined by calling [getEndDevices](#getenddevicescb))
 * **String** *capability* Capability
 * **String** *value* Value
 
@@ -130,6 +139,17 @@ Known capabilities (depends on device):
 * **10006** Turn bulb on/off. Values: `1` = on, `0` = off
 * **10008** Dim bulb. Value: `brightness:transition_time`, where `brightness` = 0-255
 * **30008** Sleep timer. Value: `seconds*10:current_unixtime`
+* **10300** Color. Value: `X:Y:transistion_time`
+* **30301** Color Temperature. Value: `ct:transition_time`, where `ct` = 170-370
+
+#### setLightColor(deviceId, red, green, blue)
+
+Convenience function for setting the color of a RGB light.
+
+* **String** *deviceId* Id of the light connected to the bridge (determined by calling [getEndDevices](#getenddevicescb))
+* **Number** *red* 0-255
+* **Number** *green* 0-255
+* **Number** *blue* 0-255
 
 ## Debugging
 
