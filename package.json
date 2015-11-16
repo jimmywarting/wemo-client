@@ -24,7 +24,7 @@
     "wemo"
   ],
   "dependencies": {
-    "node-ssdp": "~2.5.1",
+    "node-ssdp": "~2.6.3",
     "request": "~2.60.0",
     "xml2js": "~0.4.10",
     "express": "~4.13.3",
