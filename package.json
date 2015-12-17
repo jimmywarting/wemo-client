@@ -7,8 +7,8 @@
     "examples": "examples"
   },
   "scripts": {
-    "test": "mocha test/index.js",
-    "test-cov": "istanbul cover _mocha"
+    "test": "istanbul cover _mocha",
+    "test-watch": "mocha --watch"
   },
   "repository": {
     "type": "git",
@@ -32,9 +32,10 @@
     "debug": "~2.2.0"
   },
   "devDependencies": {
-    "mocha": "~2.2.5",
-    "must": "~0.12.0",
+    "codeclimate-test-reporter": "^0.1.1",
+    "istanbul": "~0.3.17",
     "mitm": "~1.1.0",
-    "istanbul": "~0.3.17"
+    "mocha": "~2.2.5",
+    "must": "~0.12.0"
   }
 }
