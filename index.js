@@ -1,4 +1,3 @@
-var util = require('util');
 var SSDPClient = require('node-ssdp').Client;
 var request = require('request');
 var xml2js = require('xml2js');
@@ -67,7 +66,7 @@ Wemo.prototype.discover = function(cb) {
 Wemo.prototype._listen = function() {
   var self = this;
   var app = express();
-  app.use(bodyparser.raw({type: 'text/xml'}));
+  app.use(bodyparser.raw({ type: 'text/xml' }));
   app.all('/:udn', function(req, res) {
     xml2js.parseString(req.body, function(err, json) {
       if (err) {

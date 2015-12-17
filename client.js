@@ -21,7 +21,7 @@ var WemoClient = module.exports = function(config) {
     this[service.serviceType[0]] = {
       serviceId: service.serviceId[0],
       controlURL: service.controlURL[0],
-      eventSubURL: service.eventSubURL[0],
+      eventSubURL: service.eventSubURL[0]
     };
   }, this.services = {});
 
@@ -80,34 +80,6 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
 };
 
 WemoClient.prototype.getEndDevices = function(cb) {
-  var parseResponse = function(err, data) {
-    if (err) cb(err);
-    debug('Response to getEndDevices', data);
-    var endDevices = [];
-    xml2js.parseString(data, function(err, result) {
-      if (!err) {
-        var list = result['s:Envelope']['s:Body'][0]['u:GetEndDevicesResponse'][0].DeviceLists[0];
-        xml2js.parseString(list, function(err, result2) {
-          if (!err) {
-            var deviceInfos = result2.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
-            if (deviceInfos) {
-              Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
-            }
-            var groupInfos = result2.DeviceLists.DeviceList[0].GroupInfos;
-            if (groupInfos) {
-              Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
-            }
-          } else {
-            console.log(err, data);
-          }
-        });
-        cb(null, endDevices);
-      } else {
-        cb(err);
-      }
-    });
-  };
-
   var parseDeviceInfo = function(data) {
     var device = {};
 
@@ -142,6 +114,34 @@ WemoClient.prototype.getEndDevices = function(cb) {
     }
 
     return device;
+  };
+
+  var parseResponse = function(err, data) {
+    if (err) return cb(err);
+    debug('Response to getEndDevices', data);
+    var endDevices = [];
+    xml2js.parseString(data, function(err, result) {
+      if (!err) {
+        var list = result['s:Envelope']['s:Body'][0]['u:GetEndDevicesResponse'][0].DeviceLists[0];
+        xml2js.parseString(list, function(err, result2) {
+          if (!err) {
+            var deviceInfos = result2.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
+            if (deviceInfos) {
+              Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
+            }
+            var groupInfos = result2.DeviceLists.DeviceList[0].GroupInfos;
+            if (groupInfos) {
+              Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
+            }
+          } else {
+            console.log(err, data);
+          }
+        });
+        cb(null, endDevices);
+      } else {
+        cb(err);
+      }
+    });
   };
 
   var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
@@ -223,7 +223,7 @@ WemoClient.prototype._unsubscribeAll = function() {
 WemoClient.prototype.handleCallback = function(json) {
   var self = this;
   if (json['e:propertyset']['e:property'][0]['StatusChange']) {
-    xml2js.parseString(json['e:propertyset']['e:property'][0]['StatusChange'][0], function (err, xml) {
+    xml2js.parseString(json['e:propertyset']['e:property'][0]['StatusChange'][0], function(err, xml) {
       if (!err && xml) {
         self.emit('statusChange',
           xml.StateEvent.DeviceID[0]._, // device id
@@ -249,7 +249,7 @@ WemoClient.prototype.handleCallback = function(json) {
       insightParams
     );
   } else if (json['e:propertyset']['e:property'][0]['attributeList']) {
-    xml2js.parseString(json['e:propertyset']['e:property'][0]['attributeList'][0], function (err, xml) {
+    xml2js.parseString(json['e:propertyset']['e:property'][0]['attributeList'][0], function(err, xml) {
       if (!err && xml) {
         self.emit('attributeList',
           xml.attribute.name[0], // name

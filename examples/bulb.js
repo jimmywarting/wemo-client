@@ -8,7 +8,7 @@ function dimBulb(client, device) {
     console.log('Dim bulb %s to %d', device.friendlyName, value);
     client.setDeviceStatus(device.deviceId, 10008, value + ':10');
   }, 3000);
-};
+}
 
 function foundDevice(deviceInfo) {
   if (deviceInfo.deviceType === Wemo.DEVICE_TYPE.Bridge) {
@@ -24,7 +24,7 @@ function foundDevice(deviceInfo) {
       }
     });
   }
-};
+}
 
 // Inital discovery
 wemo.discover(foundDevice);

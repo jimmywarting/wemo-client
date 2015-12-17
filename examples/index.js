@@ -18,7 +18,7 @@ function foundDevice(deviceInfo) {
     console.log('Binary State of %s is %s', this.device.friendlyName, states[value]);
   });
 
-};
+}
 
 // Inital discovery
 wemo.discover(foundDevice);
