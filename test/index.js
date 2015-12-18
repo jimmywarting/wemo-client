@@ -6,6 +6,8 @@ var Mitm = require('mitm');
 var Wemo = require('../index');
 var deviceInfo = require('./fixtures/deviceinfo.json');
 
+/* eslint-env mocha */
+
 describe('Wemo', function() {
 
   it('must expose a public constructor', function() {
@@ -73,7 +75,7 @@ describe('WemoClient', function() {
   });
 
   describe('#setBinaryState(val)', function() {
-    it('must send a BinaryState request', function(done) {
+    it('must send a BinaryState action', function(done) {
       mitm.on('request', function(req, res) {
         var data = '';
         req.on('data', function(chunk) { data += chunk; });
@@ -86,6 +88,27 @@ describe('WemoClient', function() {
         res.end();
       });
       client.setBinaryState(1, done);
+    });
+  });
+
+  describe('#setDeviceStatus(deviceId, capabilityId, cb)', function() {
+    it('must send a DeviceStatus action', function(done) {
+      mitm.on('request', function(req, res) {
+        var data = '';
+        req.on('data', function(chunk) { data += chunk; });
+        req.on('end', function() {
+          data.must.contain('<u:SetDeviceStatus xmlns:u="urn:Belkin:service:bridge:1">');
+          data.must.contain('<DeviceStatusList>');
+          data.must.contain('&lt;IsGroupAction&gt;YES&lt;/IsGroupAction&gt;');
+          data.must.contain('&lt;DeviceID available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;');
+          data.must.contain('&lt;CapabilityID&gt;10006&lt;/CapabilityID&gt;');
+          data.must.contain('&lt;CapabilityValue&gt;1&lt;/CapabilityValue&gt;');
+        });
+        req.url.must.equal('/upnp/control/bridge1');
+        res.statusCode = 200;
+        res.end();
+      });
+      client.setDeviceStatus('1432253402', '10006', '1', done);
     });
   });
 
