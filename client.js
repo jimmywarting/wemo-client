@@ -148,14 +148,14 @@ WemoClient.prototype.getEndDevices = function(cb) {
   this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
 };
 
-WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value) {
+WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb) {
   var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
   var body = [
     '<DeviceStatusList>',
     '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;%s&lt;/IsGroupAction&gt;&lt;DeviceID available=&quot;YES&quot;&gt;%s&lt;/DeviceID&gt;&lt;CapabilityID&gt;%s&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;%s&lt;/CapabilityValue&gt;&lt;/DeviceStatus&gt;',
     '</DeviceStatusList>'
   ].join('\n');
-  this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value));
+  this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value), cb);
 };
 
 WemoClient.prototype.setLightColor = function(deviceId, red, green, blue) {

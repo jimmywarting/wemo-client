@@ -126,13 +126,14 @@ Turn the device on or off. Will also cause a `binaryState` event to be triggered
 * **String** *value* `1` = on, `0` = off
 * **Callback** *cb* cb(err, data)
 
-#### setDeviceStatus(deviceId, capability, value)
+#### setDeviceStatus(deviceId, capability, value, cb)
 
 Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 
 * **String** *deviceId* Id of the device connected to the bridge (determined by calling [getEndDevices](#getenddevicescb))
 * **String** *capability* Capability
 * **String** *value* Value
+* **Callback** *cb* cb(err, data)
 
 Known capabilities (depends on device):
 
