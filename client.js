@@ -158,6 +158,27 @@ WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb)
   this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value), cb);
 };
 
+WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
+    var parseResponse = function(err, data) {
+	  	if (err) cb(err);
+	  		xml2js.parseString(data, function(err, result) {
+		  		if(err) cb(err);
+		  		xml2js.parseString( result['s:Envelope']['s:Body'][0]['u:GetDeviceStatusResponse'][0]['DeviceStatusList'][0] , 
+		  			function (err, result) { 
+			  			if(err) cb(err);
+			  			var deviceStatus = result['DeviceStatusList']['DeviceStatus'][0];
+				 			cb(null, deviceStatus);
+					});	
+		});
+	}
+
+
+
+  var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';  
+  var body = "<DeviceIDs>%s</DeviceIDs>";
+  this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', util.format(body, deviceId), parseResponse);
+};
+
 WemoClient.prototype.setLightColor = function(deviceId, red, green, blue) {
   var color = WemoClient.rgb2xy(red, green, blue);
   this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0');
@@ -166,6 +187,21 @@ WemoClient.prototype.setLightColor = function(deviceId, red, green, blue) {
 WemoClient.prototype.setBinaryState = function(value, cb) {
   var body = '<BinaryState>%s</BinaryState>';
   this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
+};
+
+WemoClient.prototype.getBinaryState = function(cb) {
+    var parseResponse = function(err, data) {
+    	if (err) cb(err);
+		if (data.match(/<BinaryState>(\d)<\/BinaryState>/)) {
+			cb(null, RegExp.$1);
+    	} else {
+			cb('Unknown error', data);
+    	}
+   }
+ 
+  var body = '';
+  this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', util.format(body, this.UDN), parseResponse);
+
 };
 
 WemoClient.prototype._onListenerAdded = function(eventName) {
@@ -263,6 +299,8 @@ WemoClient.prototype.handleCallback = function(json) {
     debug('Unhandled Event: %j', json);
   }
 };
+
+
 
 // Based on https://github.com/theycallmeswift/hue.js/blob/master/lib/helpers.js
 // TODO: Needs to be tweaked for more accurate color representation
