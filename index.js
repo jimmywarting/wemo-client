@@ -77,6 +77,7 @@ Wemo.prototype._listen = function() {
         console.log('Received callback for unknown device: %s', req.params.udn);
         res.sendStatus(404);
       } else {
+        debug('Incoming Request: %s', req.body);
         self._clients[req.params.udn].handleCallback(json);
         res.sendStatus(200);
       }
