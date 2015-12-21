@@ -123,12 +123,38 @@ Get bulbs connected to a Wemo Bridge. An array of `endDevices` is passed to the 
 
 * **Callback** *cb* cb(err, endDevices)
 
+#### getBinaryState(cb)
+
+Get the device's binary state.
+
+* **Callback** *cb* cb(err, state)
+
+The callback is passed the `state` (`1` = on, `0` = off).
+
 #### setBinaryState(value, cb)
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
 * **String** *value* `1` = on, `0` = off
 * **Callback** *cb* cb(err, data)
+
+#### getDeviceStatus(deviceId, cb)
+
+Gets the device Status of a device connected via Wemo Bridge, e.g. a bulb.
+
+* **String** *deviceId* Id of the device connected to the bridge (determined by calling [getEndDevices](#getenddevicescb))
+* **Callback** *cb* cb(err, deviceStatus)
+
+The callback is passed the `deviceStatus` which is a map of device capabilities and values, e.g.:
+```javascript
+{
+  '10006': '1', // on = 1, off = 0, offline = empty
+  '10008': '121:0', // brightness 0-255
+  '30008': '0:0', // no sleep timer active
+  '30009': '', // unknown
+  '3000A': '' // unknown
+}
+```
 
 #### setDeviceStatus(deviceId, capability, value, cb)
 
