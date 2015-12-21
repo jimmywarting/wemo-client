@@ -293,31 +293,17 @@ WemoClient.prototype.handleCallback = function(body) {
   });
 };
 
+WemoClient.rgb2xy = function(r, g, b) {
+  // Based on: https://github.com/aleroddepaz/pyhue/blob/master/src/pyhue.py
+  var X = (0.545053 * r) + (0.357580 * g) + (0.180423 * b);
+  var Y = (0.212671 * r) + (0.715160 * g) + (0.072169 * b);
+  var Z = (0.019334 * r) + (0.119193 * g) + (0.950227 * b);
 
-
-// Based on https://github.com/theycallmeswift/hue.js/blob/master/lib/helpers.js
-// TODO: Needs to be tweaked for more accurate color representation
-WemoClient.rgb2xy = function(red, green, blue) {
-  var xyz;
-  var rgb = [red / 255, green / 255, blue / 255];
-
-  for (var i = 0; i < 3; i++) {
-    if (rgb[i] > 0.04045) {
-      rgb[i] = Math.pow(((rgb[i] + 0.055) / 1.055), 2.4);
-    } else {
-      rgb[i] /= 12.92;
-    }
-    rgb[i] = rgb[i] * 100;
-  }
-
-  xyz = [
-    rgb[0] * 0.4124 + rgb[1] * 0.3576 + rgb[2] * 0.1805,
-    rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722,
-    rgb[0] * 0.0193 + rgb[1] * 0.1192 + rgb[2] * 0.9505
-  ];
+  var x = X / (X + Y + Z);
+  var y = Y / (X + Y + Z);
 
   return [
-    xyz[0] / (xyz[0] + xyz[1] + xyz[2]) * 65535,
-    xyz[1] / (xyz[0] + xyz[1] + xyz[2]) * 65535
+    Math.round(x * 65535),
+    Math.round(y * 65535)
   ];
 };

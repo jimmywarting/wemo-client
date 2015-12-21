@@ -4,6 +4,7 @@ var http = require('http');
 var Mitm = require('mitm');
 
 var Wemo = require('../index');
+var WemoClient = require('../client');
 var deviceInfo = require('./fixtures/deviceinfo.json');
 
 /* eslint-env mocha */
@@ -250,6 +251,15 @@ describe('WemoClient', function() {
         endDevices[1].friendlyName.must.be('Second');
         done();
       });
+    });
+  });
+
+  describe('#rgb2xy(r, g, b)', function() {
+    it('must transform rgb to xy', function() {
+      WemoClient.rgb2xy(255, 0, 0).must.eql([45968, 17936]);
+      WemoClient.rgb2xy(0, 255, 0).must.eql([19661, 39321]);
+      WemoClient.rgb2xy(0, 0, 255).must.eql([9830, 3932]);
+      WemoClient.rgb2xy(247, 241, 45).must.eql([28131, 28033]);
     });
   });
 
