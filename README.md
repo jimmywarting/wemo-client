@@ -88,7 +88,7 @@ client.on('binaryState', function(value) {
 });
 ```
 
-#### Event: statusChange
+#### Event: statusChange (deviceId, capabilityId, value)
 
 Capability of a device connected via Wemo Bridge changed its status.
 
@@ -96,7 +96,7 @@ Capability of a device connected via Wemo Bridge changed its status.
 * **String** *capabilityId* Capability
 * **String** *value* Status
 
-#### Event: attributeList
+#### Event: attributeList (name, value, prevalue, timestamp)
 
 Attribute of a device has changed. This seems to apply to Wemo Maker only for now.
 
@@ -105,7 +105,7 @@ Attribute of a device has changed. This seems to apply to Wemo Maker only for no
 * **String** *prevalue* Previous value
 * **String** *timestamp* Timestamp of the change
 
-#### Event: insightParams
+#### Event: insightParams (binaryState, instantPower, data)
 
 Wemo Insight Switch sent new power consumption data.
 
