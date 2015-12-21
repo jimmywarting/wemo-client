@@ -1,0 +1,5 @@
+<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0">
+  <e:property>
+    <BinaryState>1</BinaryState>
+  </e:property>
+</e:propertyset>

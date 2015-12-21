@@ -76,7 +76,7 @@ Get a single instance of [WemoClient](#wemoclient) for the device specified by `
 
 ### WemoClient
 
-#### Event: binaryState
+#### Event: binaryState (value)
 
 Binary state of a device has been updated, e.g. a motion sensor detected motion or a plug is switched on.
 

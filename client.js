@@ -198,7 +198,7 @@ WemoClient.prototype.subscribe = function(serviceType) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
-    throw new Error('No callbackURL given!');
+    return;
   }
 
   var options = {
@@ -237,49 +237,60 @@ WemoClient.prototype._unsubscribeAll = function() {
   }
 };
 
-// TODO: Refactor the callback handler.
-WemoClient.prototype.handleCallback = function(json) {
+WemoClient.prototype.handleCallback = function(body) {
   var self = this;
-  if (json['e:propertyset']['e:property'][0]['StatusChange']) {
-    xml2js.parseString(json['e:propertyset']['e:property'][0]['StatusChange'][0], function(err, xml) {
-      if (!err && xml) {
-        self.emit('statusChange',
-          xml.StateEvent.DeviceID[0]._, // device id
-          xml.StateEvent.CapabilityId[0], // capability id
-          xml.StateEvent.Value[0] // value
-        );
+  var handler = {
+    BinaryState: function(data) {
+      self.emit('binaryState', data.substring(0, 1));
+    },
+    StatusChange: function(data) {
+      xml2js.parseString(data, { explicitArray: false }, function(err, xml) {
+        if (!err) {
+          self.emit('statusChange',
+            xml.StateEvent.DeviceID._,
+            xml.StateEvent.CapabilityId,
+            xml.StateEvent.Value
+          );
+        }
+      });
+    },
+    InsightParams: function(data) {
+      var params = data.split('|');
+      var insightParams = {
+        ONSince: params[1],
+        OnFor: params[2],
+        TodayONTime: params[3]
+      };
+      self.emit('insightParams',
+        params[0], // binary state
+        params[7], // instant power
+        insightParams
+      );
+    },
+    attributeList: function(data) {
+      xml2js.parseString(data, { explicitArray: false }, function(err, xml) {
+        if (!err) {
+          self.emit('attributeList',
+            xml.attribute.name,
+            xml.attribute.value,
+            xml.attribute.prevalue,
+            xml.attribute.ts
+          );
+        }
+      });
+    }
+  };
+
+  xml2js.parseString(body, { explicitArray: false }, function(err, xml) {
+    if (err) throw err;
+    for (var prop in xml['e:propertyset']['e:property']) {
+      if (handler.hasOwnProperty(prop)) {
+        handler[prop](xml['e:propertyset']['e:property'][prop]);
+      } else {
+        debug('Unhandled Event: %s', prop);
       }
-    });
-  } else if (json['e:propertyset']['e:property'][0]['BinaryState']) {
-    self.emit('binaryState',
-      json['e:propertyset']['e:property'][0]['BinaryState'][0].substring(0, 1)
-    );
-  } else if (json['e:propertyset']['e:property'][0]['InsightParams']) {
-    var params = json['e:propertyset']['e:property'][0]['InsightParams'][0].split('|');
-    var insightParams = {
-      ONSince: params[1],
-      OnFor: params[2],
-      TodayONTime: params[3]
-    };
-    self.emit('insightParams',
-      params[0], // binary state
-      params[7], // instant power
-      insightParams
-    );
-  } else if (json['e:propertyset']['e:property'][0]['attributeList']) {
-    xml2js.parseString(json['e:propertyset']['e:property'][0]['attributeList'][0], function(err, xml) {
-      if (!err && xml) {
-        self.emit('attributeList',
-          xml.attribute.name[0], // name
-          xml.attribute.value[0], // value
-          xml.attribute.prevalue[0], // previous value
-          xml.attribute.ts[0] // timestamp
-        );
-      }
-    });
-  } else {
-    debug('Unhandled Event: %j', json);
-  }
+    }
+  });
 };
 
 
