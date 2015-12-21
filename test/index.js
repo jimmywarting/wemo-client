@@ -23,6 +23,26 @@ describe('Wemo', function() {
     });
   });
 
+  describe('#load(setupUrl, cb)', function() {
+    it('must load a device', function(done) {
+      var wemo = new Wemo();
+      var mitm = Mitm();
+      mitm.on('request', function(req, res) {
+        req.url.must.be('/setup.xml');
+        var fixture = fs.readFileSync(__dirname + '/fixtures/setup.xml');
+        res.write(fixture);
+        res.end();
+        mitm.disable();
+      });
+
+      wemo.load('http://127.0.0.2/setup.xml', function(device) {
+        deviceInfo.serialNumber.must.be('000000000000B');
+        done();
+      });
+
+    });
+  });
+
 });
 
 describe('WemoClient', function() {
