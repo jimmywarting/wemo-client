@@ -1,0 +1,6 @@
+<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0">
+  <e:property>
+    <StatusChange>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;StateEvent&gt;&lt;DeviceID available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;&lt;CapabilityId&gt;10008&lt;/CapabilityId&gt;&lt;Value&gt;65:0&lt;/Value&gt;&lt;/StateEvent&gt;
+    </StatusChange>
+  </e:property>
+</e:propertyset>

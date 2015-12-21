@@ -1,0 +1,9 @@
+<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Body>
+    <u:GetDeviceStatusResponse xmlns:u="urn:Belkin:service:bridge:1">
+      <DeviceStatusList>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;DeviceStatusList&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;YES&lt;/IsGroupAction&gt;&lt;DeviceID
+        available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;&lt;CapabilityID&gt;10006,10008,30008,30009,3000A&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;1,65:0,0:0,,&lt;/CapabilityValue&gt;&lt;/DeviceStatus&gt;&lt;/DeviceStatusList&gt;
+      </DeviceStatusList>
+    </u:GetDeviceStatusResponse>
+  </s:Body>
+</s:Envelope>

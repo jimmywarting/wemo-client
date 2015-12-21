@@ -39,6 +39,59 @@ describe('WemoClient', function() {
     mitm.disable();
   });
 
+  describe('Event: binaryState', function() {
+    it('must emit binaryState events', function(done) {
+      client.on('binaryState', function(state) {
+        state.must.be('1');
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/binaryStateEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
+  describe('Event: statusChange', function() {
+    it('must emit statusChange events', function(done) {
+      client.on('statusChange', function(deviceId, capabilityId, value) {
+        deviceId.must.be('1432253402');
+        capabilityId.must.be('10008');
+        value.must.be('65:0');
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/statusChangeEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
+  describe('Event: insightParams', function() {
+    it('must emit insightParams events', function(done) {
+      client.on('insightParams', function(binaryState, instantPower, data) {
+        binaryState.must.be('8');
+        instantPower.must.be('410');
+        data.must.have.property('ONSince', '1450460139');
+        data.must.have.property('OnFor', '6511');
+        data.must.have.property('TodayONTime', '0');
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/insightParamsEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
+  describe('Event: attributeList', function() {
+    it('must emit attributeList events', function(done) {
+      client.on('attributeList', function(name, value, prevalue, ts) {
+        name.must.be('Switch');
+        value.must.be('1');
+        prevalue.must.be('0');
+        ts.must.be('1450733524');
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/attributeListEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
   describe('#soapAction(serviceType, action, body, cb)', function() {
     it('must use the correct endpoint', function(done) {
       mitm.on('request', function(req, res) {
@@ -91,6 +144,21 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('#getBinaryState(cb)', function() {
+    it('must callback with a binaryState value', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getBinaryState.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getBinaryState(function(err, binaryState) {
+        demand(err).to.be.falsy();
+        binaryState.must.be('1');
+        done();
+      });
+    });
+  });
+
   describe('#setDeviceStatus(deviceId, capabilityId, cb)', function() {
     it('must send a DeviceStatus action', function(done) {
       mitm.on('request', function(req, res) {
@@ -109,6 +177,25 @@ describe('WemoClient', function() {
         res.end();
       });
       client.setDeviceStatus('1432253402', '10006', '1', done);
+    });
+  });
+
+  describe('#getDeviceStatus(deviceId, cb)', function() {
+    it('must callback with a deviceStatus', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getDeviceStatus.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getDeviceStatus('1432253402', function(err, deviceStatus) {
+        demand(err).to.be.falsy();
+        deviceStatus.must.have.property('10006', '1');
+        deviceStatus.must.have.property('10008', '65:0');
+        deviceStatus.must.have.property('30008', '0:0');
+        deviceStatus.must.have.property('30009', '');
+        deviceStatus.must.have.property('3000A', '');
+        done();
+      });
     });
   });
 

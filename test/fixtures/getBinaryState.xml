@@ -1,0 +1,7 @@
+<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Body>
+    <u:GetBinaryStateResponse xmlns:u="urn:Belkin:service:basicevent:1">
+      <BinaryState>1</BinaryState>
+    </u:GetBinaryStateResponse>
+  </s:Body>
+</s:Envelope>

@@ -68,19 +68,14 @@ Wemo.prototype._listen = function() {
   var app = express();
   app.use(bodyparser.raw({ type: 'text/xml' }));
   app.all('/:udn', function(req, res) {
-    xml2js.parseString(req.body, function(err, json) {
-      if (err) {
-        console.log(err);
-        res.sendStatus(500);
-      }
-      if (!self._clients[req.params.udn]) {
-        console.log('Received callback for unknown device: %s', req.params.udn);
-        res.sendStatus(404);
-      } else {
-        self._clients[req.params.udn].handleCallback(json);
-        res.sendStatus(200);
-      }
-    });
+    if (!self._clients[req.params.udn]) {
+      console.log('Received callback for unknown device: %s', req.params.udn);
+      res.sendStatus(404);
+    } else {
+      debug('Incoming Request: %s', req.body);
+      self._clients[req.params.udn].handleCallback(req.body);
+      res.sendStatus(200);
+    }
   });
 
   this._server = app.listen(0);
