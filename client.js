@@ -55,21 +55,24 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
     }
   };
 
+  cb = cb || function() {};
+
   var req = http.request(options, function(res) {
-    var data = '';
+    var body = '';
     res.setEncoding('utf8');
     res.on('data', function(chunk) {
-      data += chunk;
+      body += chunk;
     });
     res.on('end', function() {
-      if (cb) {
-        cb(null, data);
-      }
+      xml2js.parseString(body, { explicitArray: false }, function(err, data) {
+        if (err) return cb(err);
+        debug('%s Response: %s', action, body);
+        var response = data && data['s:Envelope']['s:Body']['u:' + action + 'Response'];
+        cb(null, response);
+      });
     });
     res.on('error', function(err) {
-      if (cb) {
-        cb(err);
-      }
+      cb(err);
       console.log(err);
     });
   });
@@ -118,29 +121,18 @@ WemoClient.prototype.getEndDevices = function(cb) {
 
   var parseResponse = function(err, data) {
     if (err) return cb(err);
-    debug('Response to getEndDevices', data);
     var endDevices = [];
-    xml2js.parseString(data, function(err, result) {
-      if (!err) {
-        var list = result['s:Envelope']['s:Body'][0]['u:GetEndDevicesResponse'][0].DeviceLists[0];
-        xml2js.parseString(list, function(err, result2) {
-          if (!err) {
-            var deviceInfos = result2.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
-            if (deviceInfos) {
-              Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
-            }
-            var groupInfos = result2.DeviceLists.DeviceList[0].GroupInfos;
-            if (groupInfos) {
-              Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
-            }
-          } else {
-            console.log(err, data);
-          }
-        });
-        cb(null, endDevices);
-      } else {
-        cb(err);
+    xml2js.parseString(data.DeviceLists, function(err, result) {
+      if (err) return cb(err);
+      var deviceInfos = result.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo;
+      if (deviceInfos) {
+        Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
       }
+      var groupInfos = result.DeviceLists.DeviceList[0].GroupInfos;
+      if (groupInfos) {
+        Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
+      }
+      cb(null, endDevices);
     });
   };
 
@@ -160,23 +152,17 @@ WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb)
 
 WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
   var parseResponse = function(err, data) {
-    if (err) cb(err);
-    xml2js.parseString(data, { explicitArray: false }, function(err, result) {
-      if (err) cb(err);
-      xml2js.parseString(result['s:Envelope']['s:Body']['u:GetDeviceStatusResponse']['DeviceStatusList'],
-        { explicitArray: false },
-        function(err, result) {
-          if (err) cb(err);
-          var deviceStatus = result['DeviceStatusList']['DeviceStatus'];
-          var capabilityIDs = deviceStatus.CapabilityID.split(',');
-          var capabilityValues = deviceStatus.CapabilityValue.split(',');
-          var capabilities = {};
-          capabilityIDs.forEach(function(val, index) {
-            capabilities[val] = capabilityValues[index];
-          });
-          cb(null, capabilities);
-        }
-      );
+    if (err) return cb(err);
+    xml2js.parseString(data.DeviceStatusList, { explicitArray: false }, function(err, result) {
+      if (err) return cb(err);
+      var deviceStatus = result['DeviceStatusList']['DeviceStatus'];
+      var capabilityIDs = deviceStatus.CapabilityID.split(',');
+      var capabilityValues = deviceStatus.CapabilityValue.split(',');
+      var capabilities = {};
+      capabilityIDs.forEach(function(val, index) {
+        capabilities[val] = capabilityValues[index];
+      });
+      cb(null, capabilities);
     });
   };
   var body = '<DeviceIDs>%s</DeviceIDs>';
@@ -194,16 +180,10 @@ WemoClient.prototype.setBinaryState = function(value, cb) {
 };
 
 WemoClient.prototype.getBinaryState = function(cb) {
-  var parseResponse = function(err, data) {
+  this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, function(err, data) {
     if (err) return cb(err);
-    xml2js.parseString(data, { explicitArray: false }, function(err, result) {
-      if (!err) {
-        var state = result['s:Envelope']['s:Body']['u:GetBinaryStateResponse']['BinaryState'];
-        cb(state);
-      }
-    });
-  };
-  this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, parseResponse);
+    cb(null, data.BinaryState);
+  });
 };
 
 WemoClient.prototype._onListenerAdded = function(eventName) {
