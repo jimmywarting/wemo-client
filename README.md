@@ -2,6 +2,10 @@
 
 Low-level client library for controlling recent Wemo devices including Bulbs. Supports event subscriptions to get live updates from devices.
 
+[![Build Status](https://travis-ci.org/timonreinhard/wemo-client.svg?branch=master)](https://travis-ci.org/timonreinhard/wemo-client)
+[![Code Climate](https://codeclimate.com/github/timonreinhard/wemo-client/badges/gpa.svg)](https://codeclimate.com/github/timonreinhard/wemo-client)
+[![Test Coverage](https://codeclimate.com/github/timonreinhard/wemo-client/badges/coverage.svg)](https://codeclimate.com/github/timonreinhard/wemo-client/coverage)
+
 ## Supported Devices
 
   * [x] Wemo Switch
