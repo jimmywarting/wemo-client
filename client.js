@@ -169,9 +169,9 @@ WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
   this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', util.format(body, deviceId), parseResponse);
 };
 
-WemoClient.prototype.setLightColor = function(deviceId, red, green, blue) {
+WemoClient.prototype.setLightColor = function(deviceId, red, green, blue, cb) {
   var color = WemoClient.rgb2xy(red, green, blue);
-  this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0');
+  this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0', cb);
 };
 
 WemoClient.prototype.setBinaryState = function(value, cb) {

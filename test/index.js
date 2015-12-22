@@ -180,6 +180,25 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('#getDeviceStatus(deviceId, cb)', function() {
+    it('must callback with a deviceStatus', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getDeviceStatus.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getDeviceStatus('1432253402', function(err, deviceStatus) {
+        demand(err).to.be.falsy();
+        deviceStatus.must.have.property('10006', '1');
+        deviceStatus.must.have.property('10008', '65:0');
+        deviceStatus.must.have.property('30008', '0:0');
+        deviceStatus.must.have.property('30009', '');
+        deviceStatus.must.have.property('3000A', '');
+        done();
+      });
+    });
+  });
+
   describe('#setDeviceStatus(deviceId, capabilityId, cb)', function() {
     it('must send a DeviceStatus action', function(done) {
       mitm.on('request', function(req, res) {
@@ -201,22 +220,21 @@ describe('WemoClient', function() {
     });
   });
 
-  describe('#getDeviceStatus(deviceId, cb)', function() {
-    it('must callback with a deviceStatus', function(done) {
+  describe('#setLightColor(deviceId, r, g, b, cb)', function() {
+    it('must send a DeviceStatus action', function(done) {
       mitm.on('request', function(req, res) {
-        var fixture = fs.readFileSync(__dirname + '/fixtures/getDeviceStatus.xml');
-        res.write(fixture);
+        var data = '';
+        req.on('data', function(chunk) { data += chunk; });
+        req.on('end', function() {
+          data.must.contain('&lt;DeviceID available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;');
+          data.must.contain('&lt;CapabilityID&gt;10300&lt;/CapabilityID&gt;');
+          data.must.contain('&lt;CapabilityValue&gt;45968:17936:0&lt;/CapabilityValue&gt;');
+        });
+        req.url.must.equal('/upnp/control/bridge1');
+        res.statusCode = 200;
         res.end();
       });
-      client.getDeviceStatus('1432253402', function(err, deviceStatus) {
-        demand(err).to.be.falsy();
-        deviceStatus.must.have.property('10006', '1');
-        deviceStatus.must.have.property('10008', '65:0');
-        deviceStatus.must.have.property('30008', '0:0');
-        deviceStatus.must.have.property('30009', '');
-        deviceStatus.must.have.property('3000A', '');
-        done();
-      });
+      client.setLightColor('1432253402', 255, 0, 0, done);
     });
   });
 
