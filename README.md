@@ -131,7 +131,7 @@ Get the device's binary state.
 
 The callback is passed the `state` (`1` = on, `0` = off).
 
-#### setBinaryState(value, cb)
+#### setBinaryState(value, [cb])
 
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
@@ -156,7 +156,7 @@ The callback is passed the `deviceStatus` which is a map of device capabilities 
 }
 ```
 
-#### setDeviceStatus(deviceId, capability, value, cb)
+#### setDeviceStatus(deviceId, capability, value, [cb])
 
 Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 
@@ -173,7 +173,7 @@ Known capabilities (depends on device):
 * **10300** Color. Value: `X:Y:transistion_time`
 * **30301** Color Temperature. Value: `ct:transition_time`, where `ct` = 170-370
 
-#### setLightColor(deviceId, red, green, blue)
+#### setLightColor(deviceId, red, green, blue, [cb])
 
 Convenience function for setting the color of a RGB light.
 
