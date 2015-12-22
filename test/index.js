@@ -272,6 +272,21 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('#subscribe(serviceType)', function() {
+    it('must send a event subscription request', function(done) {
+      mitm.on('request', function(req, res) {
+        req.url.must.equal('/upnp/event/basicevent1');
+        req.method.must.be('SUBSCRIBE');
+        req.headers.callback.must.be('<http://foo.bar:8080/uuid:Socket-1_0-000000000000B>');
+        res.statusCode = 200;
+        res.end();
+        done();
+      });
+      client.callbackURL = 'http://foo.bar:8080';
+      client.subscribe('urn:Belkin:service:basicevent:1');
+    });
+  });
+
   describe('#rgb2xy(r, g, b)', function() {
     it('must transform rgb to xy', function() {
       WemoClient.rgb2xy(255, 0, 0).must.eql([45968, 17936]);
