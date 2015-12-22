@@ -63,11 +63,11 @@ Static map of supported models and device types.
 
 Discover Wemo devices via UPnP. A `deviceInfo` will be passed to `cb` that can be used to get a client for the device found.
 
-* **Callback** *cb* Callback called for every single device found.
+* **Callback** *cb* Callback called with for every single device found.
 
 #### load(setupUrl, cb)
 
-Allows to skip discovery if the `setupUrl` of a Wemo is already known.
+Allows to skip discovery if the `setupUrl` of a Wemo is already known. A `deviceInfo` will be passed to `cb` that can be used to get a client for the device found.
 
 * **String** *setupUrl* Must point to setup.xml of the requested device (`http://device_ip:device_port/setup.xml`).
 * **Callback** *cb*
@@ -136,7 +136,7 @@ The callback is passed the `state` (`1` = on, `0` = off).
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
 * **String** *value* `1` = on, `0` = off
-* **Callback** *cb* cb(err, data)
+* **Callback** *cb* cb(err, response)
 
 #### getDeviceStatus(deviceId, cb)
 
@@ -163,7 +163,7 @@ Controls a capability of a device connected via Wemo Bridge, e.g. a bulb.
 * **String** *deviceId* Id of the device connected to the bridge (determined by calling [getEndDevices](#getenddevicescb))
 * **String** *capability* Capability
 * **String** *value* Value
-* **Callback** *cb* cb(err, data)
+* **Callback** *cb* cb(err, response)
 
 Known capabilities (depends on device):
 
@@ -181,6 +181,7 @@ Convenience function for setting the color of a RGB light.
 * **Number** *red* 0-255
 * **Number** *green* 0-255
 * **Number** *blue* 0-255
+* **Callback** *cb* cb(err, response)
 
 ## Debugging
 
