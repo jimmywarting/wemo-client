@@ -4,6 +4,16 @@ var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('wemo-client');
 
+function mapCapabilities(capabilityIds, capabilityValues) {
+  var ids = capabilityIds.split(',');
+  var values = capabilityValues.split(',');
+  var result = {};
+  ids.forEach(function(val, index) {
+    result[val] = values[index];
+  });
+  return result;
+}
+
 var WemoClient = module.exports = function(config) {
   EventEmitter.call(this);
 
@@ -87,7 +97,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
     var device = {};
 
     if (data.GroupInfo) {
-      // treat device group as single device
+      // treat device group as it was a single device
       device.friendlyName = data.GroupInfo[0].GroupName[0];
       device.deviceId = data.GroupInfo[0].GroupID[0];
       device.currentState = data.GroupInfo[0].GroupCapabilityValues[0];
@@ -101,12 +111,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
     }
 
     // process device state
-    device.currentState = device.currentState.split(',');
-    device.capabilities = device.capabilities.split(',');
-    device.internalState = {};
-    for (var i = 0; i < device.capabilities.length; i++) {
-      device.internalState[device.capabilities[i]] = device.currentState[i];
-    }
+    device.internalState = mapCapabilities(device.capabilities, device.currentState);
 
     // set device type
     if (device.capabilities.indexOf('10008') !== -1) {
@@ -156,12 +161,7 @@ WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
     xml2js.parseString(data.DeviceStatusList, { explicitArray: false }, function(err, result) {
       if (err) return cb(err);
       var deviceStatus = result['DeviceStatusList']['DeviceStatus'];
-      var capabilityIDs = deviceStatus.CapabilityID.split(',');
-      var capabilityValues = deviceStatus.CapabilityValue.split(',');
-      var capabilities = {};
-      capabilityIDs.forEach(function(val, index) {
-        capabilities[val] = capabilityValues[index];
-      });
+      var capabilities = mapCapabilities(deviceStatus.CapabilityID, deviceStatus.CapabilityValue);
       cb(null, capabilities);
     });
   };
