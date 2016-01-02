@@ -1,7 +1,6 @@
 var SSDPClient = require('node-ssdp').Client;
 var request = require('request');
 var xml2js = require('xml2js');
-var url = require('url');
 var express = require('express');
 var bodyparser = require('body-parser');
 var os = require('os');
@@ -28,10 +27,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
     if (!err) {
       xml2js.parseString(xml, function(err, json) {
         if (!err) {
-          var location = url.parse(setupUrl);
           var device = {
-            host: location.hostname,
-            port: location.port,
             setupURL: setupUrl,
             callbackURL: self.getCallbackURL()
           };

@@ -1,4 +1,5 @@
 var util = require('util');
+var url = require('url');
 var http = require('http');
 var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
@@ -17,9 +18,10 @@ function mapCapabilities(capabilityIds, capabilityValues) {
 var WemoClient = module.exports = function(config) {
   EventEmitter.call(this);
 
-  this.host = config.host;
-  this.port = config.port;
-  this.path = config.path;
+  var setupURL = url.parse(config.setupURL);
+  this.host = setupURL.hostname;
+  this.port = setupURL.port;
+
   this.deviceType = config.deviceType;
   this.UDN = config.UDN;
   this.subscriptions = {};

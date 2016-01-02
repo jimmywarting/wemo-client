@@ -1,6 +1,5 @@
 {
-  "host": "192.168.1.1",
-  "port": "49153",
+  "setupURL": "http://192.168.1.1:49153/setup.xml",
   "deviceType": "urn:Belkin:device:controllee:1",
   "friendlyName": "WeMo Switch",
   "manufacturer": "Belkin International Inc.",
