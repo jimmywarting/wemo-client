@@ -264,6 +264,8 @@ describe('WemoClient', function() {
         demand(endDevices).to.have.length(2);
         endDevices[0].friendlyName.must.be('First');
         endDevices[1].friendlyName.must.be('Second');
+        endDevices[0].deviceType.must.be('colorLight');
+        endDevices[1].deviceType.must.be('dimmableLight');
         done();
       });
     });
@@ -280,6 +282,8 @@ describe('WemoClient', function() {
         demand(endDevices).to.have.length(2);
         endDevices[0].friendlyName.must.be('First');
         endDevices[1].friendlyName.must.be('Second');
+        endDevices[0].deviceType.must.be('dimmableLight');
+        endDevices[1].deviceType.must.be('colorLight');
         done();
       });
     });

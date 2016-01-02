@@ -106,24 +106,25 @@ WemoClient.prototype.getEndDevices = function(cb) {
       // treat device group as it was a single device
       device.friendlyName = data.GroupInfo[0].GroupName[0];
       device.deviceId = data.GroupInfo[0].GroupID[0];
-      device.currentState = data.GroupInfo[0].GroupCapabilityValues[0];
-      device.capabilities = data.GroupInfo[0].GroupCapabilityIDs[0];
+      device.capabilities = mapCapabilities(
+        data.GroupInfo[0].GroupCapabilityIDs[0],
+        data.GroupInfo[0].GroupCapabilityValues[0]
+      );
     } else {
       // single device
       device.friendlyName = data.FriendlyName[0];
       device.deviceId = data.DeviceID[0];
-      device.currentState = data.CurrentState[0];
-      device.capabilities = data.CapabilityIDs[0];
+      device.capabilities = mapCapabilities(
+        data.CapabilityIDs[0],
+        data.CurrentState[0]
+      );
     }
-
-    // process device state
-    device.internalState = mapCapabilities(device.capabilities, device.currentState);
 
     // set device type
-    if (device.capabilities.indexOf('10008') !== -1) {
+    if (device.capabilities.hasOwnProperty('10008')) {
       device.deviceType = 'dimmableLight';
     }
-    if (device.capabilities.indexOf('10300') !== -1) {
+    if (device.capabilities.hasOwnProperty('10300')) {
       device.deviceType = 'colorLight';
     }
 

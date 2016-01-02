@@ -25,8 +25,8 @@
                 &lt;FriendlyName&gt;Second&lt;/FriendlyName&gt;
                 &lt;IconVersion&gt;1&lt;/IconVersion&gt;
                 &lt;FirmwareVersion&gt;7E&lt;/FirmwareVersion&gt;
-                &lt;CapabilityIDs&gt;10006,10008,30008,30009,3000A&lt;/CapabilityIDs&gt;
-                &lt;CurrentState&gt;1,255:0,0:0,,&lt;/CurrentState&gt;
+                &lt;CapabilityIDs&gt;10006,10008,30008,30009,3000A,10300&lt;/CapabilityIDs&gt;
+                &lt;CurrentState&gt;1,255:0,0:0,,,&lt;/CurrentState&gt;
                 &lt;Manufacturer&gt;MRVL&lt;/Manufacturer&gt;
                 &lt;ModelCode&gt;MZ100&lt;/ModelCode&gt;
                 &lt;WeMoCertified&gt;YES&lt;/WeMoCertified&gt;
