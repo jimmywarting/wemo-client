@@ -119,9 +119,22 @@ Wemo Insight Switch sent new power consumption data.
 
 #### getEndDevices(cb)
 
-Get bulbs connected to a Wemo Bridge. An array of `endDevices` is passed to the callback.
+Get bulbs connected to a Wemo Bridge. An `endDeviceInfo` for every device paired is passed to the callback in an array, e.g.:
+```javascript
+[{
+  friendlyName: 'Color Bulb',
+  deviceId: 'EA103EA2B2782FFF'
+  capabilities: {
+    '10006': '1'
+    '10008': '121:0'
+  },
+  deviceType: 'dimmableLight'
+}]
+```
 
-* **Callback** *cb* cb(err, endDevices)
+Device groups are treated as if they were single devices – a sole `endDeviceInfo` is returned per group.
+
+* **Callback** *cb* cb(err, endDeviceInfos)
 
 #### getBinaryState(cb)
 
