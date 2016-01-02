@@ -1,7 +1,6 @@
 var SSDPClient = require('node-ssdp').Client;
 var url = require('url');
-var express = require('express');
-var bodyparser = require('body-parser');
+var http = require('http');
 var os = require('os');
 var debug = require('debug')('wemo-client');
 
@@ -59,21 +58,31 @@ Wemo.prototype.discover = function(cb) {
 };
 
 Wemo.prototype._listen = function() {
-  var self = this;
-  var app = express();
-  app.use(bodyparser.raw({ type: 'text/xml' }));
-  app.all('/:udn', function(req, res) {
-    if (!self._clients[req.params.udn]) {
-      console.log('Received callback for unknown device: %s', req.params.udn);
-      res.sendStatus(404);
-    } else {
-      debug('Incoming Request: %s', req.body);
-      self._clients[req.params.udn].handleCallback(req.body);
-      res.sendStatus(200);
-    }
+  this._server = http.createServer(this._handleRequest.bind(this));
+  this._server.listen(0, function(err) {
+    if (err) throw err;
   });
+};
 
-  this._server = app.listen(0);
+Wemo.prototype._handleRequest = function(req, res) {
+  var body = '';
+  var udn = req.url.substring(1);
+
+  if ((req.method == 'NOTIFY') && this._clients[udn]) {
+    req.on('data', function(chunk) {
+      body += chunk.toString();
+    });
+    req.on('end', function() {
+      debug('Incoming Request for %s: %s', udn, body);
+      this._clients[udn].handleCallback(body);
+      res.writeHead(204);
+      res.end();
+    }.bind(this));
+  } else {
+    console.log('Received request for unknown device: %s', udn);
+    res.writeHead(404);
+    res.end();
+  }
 };
 
 Wemo.prototype.getCallbackURL = function() {

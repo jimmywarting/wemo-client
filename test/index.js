@@ -1,5 +1,6 @@
 var fs = require('fs');
 var demand = require('must');
+var url = require('url');
 var http = require('http');
 var Mitm = require('mitm');
 
@@ -15,13 +16,25 @@ describe('Wemo', function() {
     Wemo.must.be.a.function();
   });
 
-  it('must listen on a port', function(done) {
+  it('must process notify requests', function(done) {
     var wemo = new Wemo();
-    var address = wemo.getCallbackURL();
-    http.get(address, function(res) {
-      res.statusCode.must.equal(404);
+    var client = wemo.client(deviceInfo);
+    var address = url.parse(wemo.getCallbackURL());
+
+    client.on('binaryState', function(state) {
+      state.must.be('1');
       done();
     });
+
+    var req = http.request({
+      hostname: address.hostname,
+      port: address.port,
+      path: '/' + deviceInfo.UDN,
+      method: 'NOTIFY'
+    });
+
+    req.write(fs.readFileSync(__dirname + '/fixtures/binaryStateEvent.xml'));
+    req.end();
   });
 
   describe('#load(setupUrl, cb)', function() {
