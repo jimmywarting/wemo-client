@@ -1,6 +1,5 @@
 var SSDPClient = require('node-ssdp').Client;
-var request = require('request');
-var xml2js = require('xml2js');
+var url = require('url');
 var express = require('express');
 var bodyparser = require('body-parser');
 var os = require('os');
@@ -23,27 +22,27 @@ Wemo.DEVICE_TYPE = {
 
 Wemo.prototype.load = function(setupUrl, cb) {
   var self = this;
-  request.get(setupUrl, function(err, res, xml) {
-    if (!err) {
-      xml2js.parseString(xml, function(err, json) {
-        if (!err) {
-          var device = {
-            setupURL: setupUrl,
-            callbackURL: self.getCallbackURL()
-          };
-          for (var key in json.root.device[0]) {
-            device[key] = json.root.device[0][key][0];
-          }
+  var location = url.parse(setupUrl);
 
-          // Return only matching devices and return them only once!
-          if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
-            debug('Found device: %j', json);
-            if (cb) {
-              cb.call(self, device);
-            }
-          }
+  WemoClient.request({
+    host: location.hostname,
+    port: location.port,
+    path: location.path,
+    method: 'GET'
+  }, function(err, json) {
+    if (!err) {
+      var device = json.root.device;
+      device.host = location.hostname;
+      device.port = location.port;
+      device.callbackURL = self.getCallbackURL();
+
+      // Return only matching devices and return them only once!
+      if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
+        debug('Found device: %j', json);
+        if (cb) {
+          cb.call(self, device);
         }
-      });
+      }
     }
   });
 };

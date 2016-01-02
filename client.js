@@ -1,5 +1,4 @@
 var util = require('util');
-var url = require('url');
 var http = require('http');
 var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
@@ -18,10 +17,8 @@ function mapCapabilities(capabilityIds, capabilityValues) {
 var WemoClient = module.exports = function(config) {
   EventEmitter.call(this);
 
-  var setupURL = url.parse(config.setupURL);
-  this.host = setupURL.hostname;
-  this.port = setupURL.port;
-
+  this.host = config.host;
+  this.port = config.port;
   this.deviceType = config.deviceType;
   this.UDN = config.UDN;
   this.subscriptions = {};
@@ -30,10 +27,10 @@ var WemoClient = module.exports = function(config) {
 
   // Create map of services
   config.serviceList.service.forEach(function(service) {
-    this[service.serviceType[0]] = {
-      serviceId: service.serviceId[0],
-      controlURL: service.controlURL[0],
-      eventSubURL: service.eventSubURL[0]
+    this[service.serviceType] = {
+      serviceId: service.serviceId,
+      controlURL: service.controlURL,
+      eventSubURL: service.eventSubURL
     };
   }, this.services = {});
 
@@ -51,10 +48,37 @@ WemoClient.EventServices = {
   binaryState:  'urn:Belkin:service:basicevent:1'
 };
 
+WemoClient.request = function(options, data, cb) {
+  if (!cb && typeof data === 'function') {
+    cb = data;
+    data = null;
+  }
+
+  var req = http.request(options, function(res) {
+    var body = '';
+    res.setEncoding('utf8');
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+    res.on('end', function() {
+      xml2js.parseString(body, { explicitArray: false }, cb);
+    });
+    res.on('error', function(err) {
+      cb(err);
+    });
+  });
+  if (data) {
+    req.write(data);
+  }
+  req.end();
+};
+
 WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
-  var soapHeader = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>';
-  var soapBody = util.format('<u:%s xmlns:u="%s">%s</u:%s>', action, serviceType, body, action);
-  var soapFooter = '</s:Body></s:Envelope>';
+  cb = cb || function() {};
+
+  var payload = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>';
+  payload += util.format('<u:%s xmlns:u="%s">%s</u:%s>', action, serviceType, body, action);
+  payload += '</s:Body></s:Envelope>';
 
   var options = {
     host: this.host,
@@ -67,31 +91,11 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
     }
   };
 
-  cb = cb || function() {};
-
-  var req = http.request(options, function(res) {
-    var body = '';
-    res.setEncoding('utf8');
-    res.on('data', function(chunk) {
-      body += chunk;
-    });
-    res.on('end', function() {
-      xml2js.parseString(body, { explicitArray: false }, function(err, data) {
-        if (err) return cb(err);
-        debug('%s Response: %s', action, body);
-        var response = data && data['s:Envelope']['s:Body']['u:' + action + 'Response'];
-        cb(null, response);
-      });
-    });
-    res.on('error', function(err) {
-      cb(err);
-      console.log(err);
-    });
+  WemoClient.request(options, payload, function(err, response) {
+    if (err) return cb(err);
+    debug('%s Response: %s', action, response);
+    cb(null, response && response['s:Envelope']['s:Body']['u:' + action + 'Response']);
   });
-  req.write(soapHeader);
-  req.write(soapBody);
-  req.write(soapFooter);
-  req.end();
 };
 
 WemoClient.prototype.getEndDevices = function(cb) {
