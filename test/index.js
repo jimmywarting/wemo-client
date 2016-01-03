@@ -289,18 +289,21 @@ describe('WemoClient', function() {
     });
   });
 
-  describe('#subscribe(serviceType)', function() {
+  describe('#on(binaryState)', function() {
     it('must send a event subscription request', function(done) {
       mitm.on('request', function(req, res) {
         req.url.must.equal('/upnp/event/basicevent1');
         req.method.must.be('SUBSCRIBE');
         req.headers.callback.must.be('<http://foo.bar:8080/uuid:Socket-1_0-000000000000B>');
         res.statusCode = 200;
+        res.setHeader('sid', 'SubscriptionId');
         res.end();
         done();
       });
       client.callbackURL = 'http://foo.bar:8080';
-      client.subscribe('urn:Belkin:service:basicevent:1');
+      client.on('binaryState', function() {});
+      // will fail when this causes another subscription request - it must not.
+      client.on('binaryState', function() {});
     });
   });
 

@@ -196,15 +196,18 @@ WemoClient.prototype.getBinaryState = function(cb) {
 WemoClient.prototype._onListenerAdded = function(eventName) {
   var serviceType = WemoClient.EventServices[eventName];
   if (serviceType && this.services[serviceType]) {
-    this.subscribe(serviceType);
+    this._subscribe(serviceType);
   }
 };
 
-WemoClient.prototype.subscribe = function(serviceType) {
+WemoClient.prototype._subscribe = function(serviceType) {
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
+    return;
+  }
+  if (this.subscriptions[serviceType] && this.subscriptions[serviceType] === 'PENDING') {
     return;
   }
 
@@ -220,6 +223,7 @@ WemoClient.prototype.subscribe = function(serviceType) {
 
   if (!this.subscriptions[serviceType]) {
     // Initial subscription
+    this.subscriptions[serviceType] = 'PENDING';
     debug('Initial subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.CALLBACK = '<' + this.callbackURL + '/' + this.UDN + '>';
     options.headers.NT = 'upnp:event';
@@ -233,7 +237,7 @@ WemoClient.prototype.subscribe = function(serviceType) {
     if (res.headers.sid) {
       this.subscriptions[serviceType] = res.headers.sid;
     }
-    setTimeout(this.subscribe.bind(this), 120 * 1000, serviceType);
+    setTimeout(this._subscribe.bind(this), 120 * 1000, serviceType);
   }.bind(this));
   req.end();
 };
