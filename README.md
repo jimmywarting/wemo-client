@@ -136,6 +136,8 @@ Get bulbs connected to a Wemo Bridge. An `endDeviceInfo` for every device paired
 
 Device groups are treated as if they were single devices – a sole `endDeviceInfo` is returned per group.
 
+*Notice:* The `capabilities` property may represent outdated values due to some odd behavior of the device API. Please refer to [getDeviceStatus](#getdevicestatusdeviceid-cb) or [Event: statusChange](#event-statuschange-deviceid-capabilityid-value) to obtain the current state of the device.
+
 * **Callback** *cb* cb(err, endDeviceInfos)
 
 #### getBinaryState(cb)
