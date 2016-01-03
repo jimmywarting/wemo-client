@@ -5,6 +5,7 @@ Low-level client library for controlling recent Wemo devices including Bulbs. Su
 [![Build Status](https://travis-ci.org/timonreinhard/wemo-client.svg?branch=master)](https://travis-ci.org/timonreinhard/wemo-client)
 [![Code Climate](https://codeclimate.com/github/timonreinhard/wemo-client/badges/gpa.svg)](https://codeclimate.com/github/timonreinhard/wemo-client)
 [![Test Coverage](https://codeclimate.com/github/timonreinhard/wemo-client/badges/coverage.svg)](https://codeclimate.com/github/timonreinhard/wemo-client/coverage)
+[![Npm](https://img.shields.io/npm/v/wemo-client.svg)](http://npmjs.com/package/wemo-client)
 
 ## Supported Devices
 
