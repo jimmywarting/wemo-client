@@ -8,14 +8,15 @@ Low-level client library for controlling recent Wemo devices including Bulbs. Su
 
 ## Supported Devices
 
-  * [x] Wemo Switch
-  * [x] Wemo Motion
-  * [x] Wemo Insight Switch
-  * [x] Wemo Maker
-  * [x] Wemo LED Bulb
-  * [x] OSRAM Lightify Flex RGBW
-  * [ ] OSRAM Lightify Tunable White
-  * [ ] OSRAM Gardenspot Mini RGB
+  * Wemo Switch
+  * Wemo Motion
+  * Wemo Insight Switch
+  * Wemo Maker
+  * Wemo Link
+    * Wemo LED Bulb
+    * OSRAM Lightify Flex RGBW
+    * OSRAM Lightify Tunable White (untested)
+    * OSRAM Gardenspot Mini RGB (untested)
 
 ## Install
 
