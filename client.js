@@ -242,12 +242,6 @@ WemoClient.prototype._subscribe = function(serviceType) {
   req.end();
 };
 
-WemoClient.prototype._unsubscribeAll = function() {
-  for (var serviceType in this.subscriptions) {
-    this.unsubscribe(serviceType);
-  }
-};
-
 WemoClient.prototype.handleCallback = function(body) {
   var self = this;
   var handler = {
