@@ -14,6 +14,7 @@ Low-level client library for controlling recent Wemo devices including Bulbs. Su
   * Wemo Insight Switch
   * Wemo Maker
   * Wemo Link
+  * Wemo Light Switch
     * Wemo LED Bulb
     * OSRAM Lightify Flex RGBW
     * OSRAM Lightify Tunable White (untested)
@@ -60,6 +61,7 @@ Static map of supported models and device types.
 * Motion
 * Maker
 * Insight
+* LightSwith
 
 #### discover(cb)
 
