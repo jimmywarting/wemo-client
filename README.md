@@ -14,11 +14,11 @@ Low-level client library for controlling recent Wemo devices including Bulbs. Su
   * Wemo Insight Switch
   * Wemo Maker
   * Wemo Link
-  * Wemo Light Switch
     * Wemo LED Bulb
     * OSRAM Lightify Flex RGBW
     * OSRAM Lightify Tunable White (untested)
     * OSRAM Gardenspot Mini RGB (untested)
+  * Wemo Light Switch
 
 ## Install
 
