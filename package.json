@@ -7,7 +7,7 @@
     "examples": "./examples"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "istanbul test _mocha",
     "test-cov": "istanbul cover _mocha",
     "test-e2e": "mocha ./test-e2e",
     "preversion": "npm test",
