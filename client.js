@@ -67,6 +67,9 @@ WemoClient.request = function(options, data, cb) {
       cb(err);
     });
   });
+  req.on('error', function(err) {
+    cb(err);
+  });
   if (data) {
     req.write(data);
   }
