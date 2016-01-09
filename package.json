@@ -1,15 +1,17 @@
 {
   "name": "wemo-client",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "JavaScript client library for controlling and subscribing to Wemo Devices",
   "main": "index.js",
   "directories": {
     "examples": "./examples"
   },
   "scripts": {
-    "test": "istanbul cover _mocha",
-    "test-watch": "mocha --watch",
-    "test-e2e": "mocha ./test-e2e"
+    "test": "istanbul test _mocha",
+    "test-cov": "istanbul cover _mocha",
+    "test-e2e": "mocha ./test-e2e",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
