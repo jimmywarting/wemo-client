@@ -14,9 +14,9 @@ function mapCapabilities(capabilityIds, capabilityValues) {
   return result;
 }
 
-var WemoClient = module.exports = function(config) {
+var WemoClient = module.exports = function(config, log) {
   EventEmitter.call(this);
-
+  this.log = log || debug;
   this.host = config.host;
   this.port = config.port;
   this.deviceType = config.deviceType;
@@ -64,10 +64,16 @@ WemoClient.request = function(options, data, cb) {
       xml2js.parseString(body, { explicitArray: false }, cb);
     });
     res.on('error', function(err) {
+      debug('Error on http.request.res:', err);
       cb(err);
     });
   });
+  req.setTimeout(3000, function() {  // 3 seconds to respond so we're inside the homekit wait
+    req.abort();
+    debug('Error on http.request.req: Timed out!');
+  });
   req.on('error', function(err) {
+    debug('Error on http.request.req:', err);
     cb(err);
   });
   if (data) {
@@ -96,7 +102,7 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
 
   WemoClient.request(options, payload, function(err, response) {
     if (err) return cb(err);
-    debug('%s Response: %s', action, response);
+    debug('%s Response: ', action, response);
     cb(null, response && response['s:Envelope']['s:Body']['u:' + action + 'Response']);
   });
 };
@@ -105,13 +111,13 @@ WemoClient.prototype.getEndDevices = function(cb) {
   var parseDeviceInfo = function(data) {
     var device = {};
 
-    if (data.GroupInfo) {
+    if (data.GroupID) {
       // treat device group as it was a single device
-      device.friendlyName = data.GroupInfo[0].GroupName[0];
-      device.deviceId = data.GroupInfo[0].GroupID[0];
+      device.friendlyName = data.GroupName[0];
+      device.deviceId = data.GroupID[0];
       device.capabilities = mapCapabilities(
-        data.GroupInfo[0].GroupCapabilityIDs[0],
-        data.GroupInfo[0].GroupCapabilityValues[0]
+        data.GroupCapabilityIDs[0],
+        data.GroupCapabilityValues[0]
       );
     } else {
       // single device
@@ -136,6 +142,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
 
   var parseResponse = function(err, data) {
     if (err) return cb(err);
+    debug('endDevices raw data', data);
     var endDevices = [];
     xml2js.parseString(data.DeviceLists, function(err, result) {
       if (err) return cb(err);
@@ -143,8 +150,8 @@ WemoClient.prototype.getEndDevices = function(cb) {
       if (deviceInfos) {
         Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
       }
-      var groupInfos = result.DeviceLists.DeviceList[0].GroupInfos;
-      if (groupInfos) {
+      if (result.DeviceLists.DeviceList[0].GroupInfos) {
+        var groupInfos = result.DeviceLists.DeviceList[0].GroupInfos[0].GroupInfo;
         Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
       }
       cb(null, endDevices);
@@ -154,7 +161,6 @@ WemoClient.prototype.getEndDevices = function(cb) {
   var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
   this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
 };
-
 WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb) {
   var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
   var body = [
@@ -204,13 +210,16 @@ WemoClient.prototype._onListenerAdded = function(eventName) {
 };
 
 WemoClient.prototype._subscribe = function(serviceType) {
+
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
+    debug('no callback URL - returning');
     return;
   }
   if (this.subscriptions[serviceType] && this.subscriptions[serviceType] === 'PENDING') {
+    debug('PENDING - returning');
     return;
   }
 
@@ -236,12 +245,33 @@ WemoClient.prototype._subscribe = function(serviceType) {
     options.headers.SID = this.subscriptions[serviceType];
   }
 
+  var self = this;
+
   var req = http.request(options, function(res) {
     if (res.headers.sid) {
       this.subscriptions[serviceType] = res.headers.sid;
       setTimeout(this._subscribe.bind(this), 120 * 1000, serviceType);
     }
   }.bind(this));
+
+  req.on('error', function(err) {
+    // We can't pass back errors to the calling module so we'll do what we can to try
+    // and gracefully recover from HTTP errors.
+    // ECONNREFUSED suggests that the port number may have changed
+    // EHOSTUNREACH suggests the device has gone (switched off maybe)
+    // ETIMEDOUT    seems to be recoverable - just lost it for a bit, we'll retry.
+    var timeout = 5; // seconds before we retry
+    self.log('HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.',
+      err.code, self.device.friendlyName, self.device.host, self.device.port, self.UDN);
+    if (err.code === 'ECONNREFUSED') { // try the alternate port that wemo tends to use.
+      (self.port === '49154') ? self.port = '49153' : self.port = '49154' ;
+      self.log('Trying port: %s', self.port);
+      timeout = 1; // may as well try the new port sooner than later
+    }
+    this.subscriptions[serviceType] = null; // reset expectations about the presence of this device
+    setTimeout(this._subscribe.bind(this), timeout * 1000, serviceType);
+  }.bind(this));
+
   req.end();
 };
 

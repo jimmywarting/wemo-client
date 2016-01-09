@@ -61,7 +61,9 @@ Wemo.prototype.discover = function(cb) {
 Wemo.prototype._listen = function() {
   this._server = http.createServer(this._handleRequest.bind(this));
   this._server.listen(0, function(err) {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
   });
 };
 
@@ -109,11 +111,11 @@ Wemo.prototype.getCallbackURL = function() {
   return this._callbackURL;
 };
 
-Wemo.prototype.client = function(device) {
+Wemo.prototype.client = function(device, log) {
   if (this._clients[device.UDN]) {
     return this._clients[device.UDN];
   }
 
-  var client = this._clients[device.UDN] = new WemoClient(device);
+  var client = this._clients[device.UDN] = new WemoClient(device, log);
   return client;
 };
