@@ -235,7 +235,9 @@ WemoClient.prototype._subscribe = function(serviceType) {
     debug('Renewing subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.SID = this.subscriptions[serviceType];
   }
-
+  
+  var self=this;
+  
   var req = http.request(options, function(res) {
     if (res.headers.sid) {
       this.subscriptions[serviceType] = res.headers.sid;
@@ -243,7 +245,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     }
   }.bind(this));
   req.on('error', function(err) {
-    cb(err);
+    debug('Failure on subscription request - Device: %s, Service: %s, Error:', self.UDN, serviceType,err);
   });
   req.end();
 };
