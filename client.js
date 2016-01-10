@@ -242,6 +242,9 @@ WemoClient.prototype._subscribe = function(serviceType) {
       setTimeout(this._subscribe.bind(this), 120 * 1000, serviceType);
     }
   }.bind(this));
+  req.on('error', function(err) {
+    cb(err);
+  });
   req.end();
 };
 
