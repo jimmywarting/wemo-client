@@ -245,7 +245,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     }
   }.bind(this));
   req.on('error', function(err) {
-    debug('Failure on subscription request - Device: %s, Service: %s, Error:', self.UDN, serviceType,err);
+    debug('Failure on subscription request IGNORED - Device: %s, Service: %s, Error:', self.UDN, serviceType, err);
   });
   req.end();
 };
