@@ -254,8 +254,9 @@ WemoClient.prototype._subscribe = function(serviceType) {
     if (err.code === "ECONNRESET") {
         console.log("ECONNRESET occured, we'll ignore it for now!");
         //specific error treatment
-    }
+    } else {
         console.log("Some error (%s) occured, we'll ignore", err.code);
+        }
     });
   req.end();
 };
