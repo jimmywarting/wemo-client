@@ -235,18 +235,28 @@ WemoClient.prototype._subscribe = function(serviceType) {
     debug('Renewing subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.SID = this.subscriptions[serviceType];
   }
-  
-  var self=this;
-  
+
   var req = http.request(options, function(res) {
     if (res.headers.sid) {
       this.subscriptions[serviceType] = res.headers.sid;
       setTimeout(this._subscribe.bind(this), 120 * 1000, serviceType);
     }
   }.bind(this));
+  
+  req.on('socket', function (socket) {
+    socket.setTimeout(3 * 1000);  // we'll give the Wemo 3s to get back to us.
+    socket.on('timeout', function() {
+        req.abort();
+        });
+    });
+    
   req.on('error', function(err) {
-    debug('Failure on subscription request IGNORED - Device: %s, Service: %s, Error:', self.UDN, serviceType, err);
-  });
+    if (err.code === "ECONNRESET") {
+        this.log("ECONNRESET occured, we'll ignore it for now!");
+        //specific error treatment
+    }
+        this.log("Some error (%s) occured, we'll ignore", err.code);
+    });
   req.end();
 };
 
