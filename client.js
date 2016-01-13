@@ -252,10 +252,10 @@ WemoClient.prototype._subscribe = function(serviceType) {
     
   req.on('error', function(err) {
     if (err.code === "ECONNRESET") {
-        this.log("ECONNRESET occured, we'll ignore it for now!");
+        console.log("ECONNRESET occured, we'll ignore it for now!");
         //specific error treatment
     }
-        this.log("Some error (%s) occured, we'll ignore", err.code);
+        console.log("Some error (%s) occured, we'll ignore", err.code);
     });
   req.end();
 };
