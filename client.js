@@ -251,7 +251,8 @@ WemoClient.prototype._subscribe = function(serviceType) {
     });
     
   req.on('error', function(err) {
-    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. Device: ", err.code, this );
+    var re = /quick\s(brown).+?(jumps)/ig;
+    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. Device: ", err.code, this.exec(re));
     });
     
   req.end();
