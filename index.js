@@ -80,7 +80,7 @@ Wemo.prototype._handleRequest = function(req, res) {
       res.end();
     }.bind(this));
   } else {
-    console.log('Received request for unknown device: %s', udn);
+    debug('Received request for unknown device: %s', udn);
     res.writeHead(404);
     res.end();
   }
