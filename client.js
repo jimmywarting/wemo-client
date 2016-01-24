@@ -4,6 +4,8 @@ var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('wemo-client');
 
+"use strict"
+
 function mapCapabilities(capabilityIds, capabilityValues) {
   var ids = capabilityIds.split(',');
   var values = capabilityValues.split(',');
@@ -235,6 +237,8 @@ WemoClient.prototype._subscribe = function(serviceType) {
     debug('Renewing subscription - Device: %s, Service: %s', this.UDN, serviceType);
     options.headers.SID = this.subscriptions[serviceType];
   }
+  
+  var wemo = this;
 
   var req = http.request(options, function(res) {
     if (res.headers.sid) {
@@ -243,16 +247,10 @@ WemoClient.prototype._subscribe = function(serviceType) {
     }
   }.bind(this));
   
-  req.on('socket', function (socket) {
-    socket.setTimeout(3 * 1000);  // we'll give the Wemo 3s to get back to us.
-    socket.on('timeout', function() {
-        req.abort();
-        });
-    });
-    
   req.on('error', function(err) {
-    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. HTTP Request Device Data:\n", err.code, this.connection._pendingData);
-    });
+    console.log("HTTP Error (%s) occurred resubscribing to Wemo Device (%s - %s:%s), waiting and retrying in 5s.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port);
+    setTimeout(this._subscribe.bind(this), 5 * 1000, serviceType);
+    }.bind(this));
     
   req.end();
 };
