@@ -251,8 +251,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     });
     
   req.on('error', function(err) {
-    var re = /(\d+\.\d+\.\d+\.\d+):(\d+)/;
-    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. Device: ", err.code, re.exec(this));
+    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. HTTP Request Device Data: ", err.code, this.connection._pendingData);
     });
     
   req.end();
