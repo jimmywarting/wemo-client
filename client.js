@@ -251,7 +251,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     });
     
   req.on('error', function(err) {
-    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. HTTP Request Device Data: ", err.code, this.connection._pendingData);
+    console.log("Error (%s) occured subscribing to a wemo, we'll ignore. HTTP Request Device Data:\n", err.code, this.connection._pendingData);
     });
     
   req.end();
