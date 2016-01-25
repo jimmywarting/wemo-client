@@ -1,6 +1,6 @@
 {
   "name": "wemo-client",
-  "version": "0.6.4a",
+  "version": "0.6.4b",
   "description": "JavaScript client library for controlling and subscribing to Wemo Devices",
   "main": "index.js",
   "directories": {
