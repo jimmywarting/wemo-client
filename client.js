@@ -248,7 +248,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
   }.bind(this));
   
   req.on('error', function(err) {
-    console.log("HTTP Error (%s) occurred resubscribing to Wemo Device (%s - %s:%s), waiting and retrying in 5s.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port);
+    console.log("HTTP Error (%s) occurred resubscribing to Wemo Device (%s - %s:%s), waiting and retrying in 5s.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
     setTimeout(this._subscribe.bind(this), 5 * 1000, serviceType);
     }.bind(this));
     
