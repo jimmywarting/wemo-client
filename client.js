@@ -98,7 +98,7 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
 
   WemoClient.request(options, payload, function(err, response) {
     if (err) return cb(err);
-    debug('%s Response: %s', action, response);
+    debug('%s Response: ', action, response);
     cb(null, response && response['s:Envelope']['s:Body']['u:' + action + 'Response']);
   });
 };
@@ -205,14 +205,18 @@ WemoClient.prototype._onListenerAdded = function(eventName) {
   }
 };
 
-WemoClient.prototype._subscribe = function(serviceType) {
+WemoClient.prototype._subscribe = function(serviceType, retry) {
+    if (retry) { console.log('Retrying: %s ', this.UDN )}
+    
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
+      debug("no callback URL - returning");
     return;
   }
   if (this.subscriptions[serviceType] && this.subscriptions[serviceType] === 'PENDING') {
+      debug("PENDING - returning");
     return;
   }
 
@@ -226,7 +230,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     }
   };
 
-  if (!this.subscriptions[serviceType]) {
+  if (!this.subscriptions[serviceType]) { 
     // Initial subscription
     this.subscriptions[serviceType] = 'PENDING';
     debug('Initial subscription - Device: %s, Service: %s', this.UDN, serviceType);
@@ -248,8 +252,17 @@ WemoClient.prototype._subscribe = function(serviceType) {
   }.bind(this));
   
   req.on('error', function(err) {
-    console.log("HTTP Error (%s) occurred resubscribing to Wemo Device (%s - %s:%s), waiting and retrying in 5s.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
-    setTimeout(this._subscribe.bind(this), 5 * 1000, serviceType);
+      // ECONNREFUSED suggests that the port number may have changed
+      // EHOSTUNREACH suggests the device has gone (switched off maybe)
+      // ETIMEDOUT    seems to be recoverable - just lost it for a bit, we'll retry.
+
+    console.log("HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
+    if (err.code === 'ECONNREFUSED') { // this should be improved to try 49153-55 it appears
+        ( wemo.port === '49154' ) ? wemo.port-- : wemo.port++ ;
+        console.log('Trying port change to: %s', wemo.port);
+    }
+    this.subscriptions[serviceType] = null; //reset expectations about the presence of this device
+    setTimeout(this._subscribe.bind(this), 5 * 1000, serviceType, true);
     }.bind(this));
     
   req.end();
