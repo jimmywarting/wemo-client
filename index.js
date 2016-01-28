@@ -20,6 +20,12 @@ Wemo.DEVICE_TYPE = {
   LightSwitch: 'urn:Belkin:device:lightswitch:1'
 };
 
+Wemo.ERROR = {
+    Timeout: 'ETIMEDOUT',
+    Refused: 'ECONNREFUSED',
+    Down:    'EHOSTDOWN'
+}
+
 Wemo.prototype.load = function(setupUrl, cb) {
   var self = this;
   var location = url.parse(setupUrl);

@@ -4,7 +4,7 @@ var xml2js = require('xml2js');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('wemo-client');
 
-"use strict"
+'use strict';
 
 function mapCapabilities(capabilityIds, capabilityValues) {
   var ids = capabilityIds.split(',');
@@ -66,10 +66,12 @@ WemoClient.request = function(options, data, cb) {
       xml2js.parseString(body, { explicitArray: false }, cb);
     });
     res.on('error', function(err) {
+      console.log("Error on http.request.res:", err)
       cb(err);
     });
   });
   req.on('error', function(err) {
+      console.log("Error on http.request.req:", err)
     cb(err);
   });
   if (data) {
@@ -205,9 +207,8 @@ WemoClient.prototype._onListenerAdded = function(eventName) {
   }
 };
 
-WemoClient.prototype._subscribe = function(serviceType, retry) {
-    if (retry) { console.log('Retrying: %s ', this.UDN )}
-    
+WemoClient.prototype._subscribe = function(serviceType) {
+  
   if (!this.services[serviceType]) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
@@ -252,17 +253,21 @@ WemoClient.prototype._subscribe = function(serviceType, retry) {
   }.bind(this));
   
   req.on('error', function(err) {
-      // ECONNREFUSED suggests that the port number may have changed
-      // EHOSTUNREACH suggests the device has gone (switched off maybe)
-      // ETIMEDOUT    seems to be recoverable - just lost it for a bit, we'll retry.
-
-    console.log("HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.", err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
-    if (err.code === 'ECONNREFUSED') { // this should be improved to try 49153-55 it appears
+    // We can't pass back errors to the calling module so we'll do what we can to try
+    // and gracefully recover from HTTP errors.
+    // ECONNREFUSED suggests that the port number may have changed
+    // EHOSTUNREACH suggests the device has gone (switched off maybe)
+    // ETIMEDOUT    seems to be recoverable - just lost it for a bit, we'll retry.
+    var timeout = 5; //seconds before we retry
+    console.log("HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.", 
+        err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
+    if (err.code === 'ECONNREFUSED') { // try the alternate port that wemo tends to use.
         ( wemo.port === '49154' ) ? wemo.port-- : wemo.port++ ;
-        console.log('Trying port change to: %s', wemo.port);
+        console.log('Trying port: %s', wemo.port);
+        timeout = 1; // may as well try the new port sooner than later
     }
     this.subscriptions[serviceType] = null; //reset expectations about the presence of this device
-    setTimeout(this._subscribe.bind(this), 5 * 1000, serviceType, true);
+    setTimeout(this._subscribe.bind(this), timeout * 1000, serviceType);
     }.bind(this));
     
   req.end();
