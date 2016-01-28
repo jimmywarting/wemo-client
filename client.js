@@ -66,12 +66,16 @@ WemoClient.request = function(options, data, cb) {
       xml2js.parseString(body, { explicitArray: false }, cb);
     });
     res.on('error', function(err) {
-      console.log("Error on http.request.res:", err)
+      debug("Error on http.request.res:", err)
       cb(err);
     });
   });
+  req.setTimeout( 3000, function () {  // 3 seconds to respond so we're inside the homekit wait
+      req.abort();
+      debug("Error on http.request.req: Timed out!")}
+      ); 
   req.on('error', function(err) {
-      console.log("Error on http.request.req:", err)
+    debug("Error on http.request.req:", err);
     cb(err);
   });
   if (data) {
