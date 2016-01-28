@@ -266,7 +266,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     console.log("HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.", 
         err.code, wemo.device.friendlyName, wemo.device.host, wemo.device.port, wemo.UDN);
     if (err.code === 'ECONNREFUSED') { // try the alternate port that wemo tends to use.
-        ( wemo.port === '49154' ) ? wemo.port-- : wemo.port++ ;
+        ( wemo.port === '49154' ) ? wemo.port = '49153' : wemo.port = '49154' ;
         console.log('Trying port: %s', wemo.port);
         timeout = 1; // may as well try the new port sooner than later
     }
