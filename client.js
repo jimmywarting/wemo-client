@@ -144,6 +144,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
 
   var parseResponse = function(err, data) {
     if (err) return cb(err);
+    debug('endDevices raw data',data);
     var endDevices = [];
     xml2js.parseString(data.DeviceLists, function(err, result) {
       if (err) return cb(err);
