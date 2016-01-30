@@ -113,13 +113,13 @@ WemoClient.prototype.getEndDevices = function(cb) {
   var parseDeviceInfo = function(data) {
     var device = {};
 
-    if (data.GroupInfo) {
+    if (data.GroupID) {
       // treat device group as it was a single device
-      device.friendlyName = data.GroupInfo[0].GroupName[0];
-      device.deviceId = data.GroupInfo[0].GroupID[0];
+      device.friendlyName = data.GroupName[0];
+      device.deviceId = data.GroupID[0];
       device.capabilities = mapCapabilities(
-        data.GroupInfo[0].GroupCapabilityIDs[0],
-        data.GroupInfo[0].GroupCapabilityValues[0]
+        data.GroupCapabilityIDs[0],
+        data.GroupCapabilityValues[0]
       );
     } else {
       // single device
@@ -152,8 +152,9 @@ WemoClient.prototype.getEndDevices = function(cb) {
       if (deviceInfos) {
         Array.prototype.push.apply(endDevices, deviceInfos.map(parseDeviceInfo));
       }
-      var groupInfos = result.DeviceLists.DeviceList[0].GroupInfos;
-      if (groupInfos) {
+      if(result.DeviceLists.DeviceList[0].GroupInfos) {
+          var groupInfos = result.DeviceLists.DeviceList[0].GroupInfos[0].GroupInfo;
+//       if (groupInfos) {
         Array.prototype.push.apply(endDevices, groupInfos.map(parseDeviceInfo));
       }
       cb(null, endDevices);
@@ -163,7 +164,6 @@ WemoClient.prototype.getEndDevices = function(cb) {
   var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
   this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
 };
-
 WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb) {
   var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
   var body = [
