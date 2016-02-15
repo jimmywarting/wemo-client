@@ -111,11 +111,11 @@ Wemo.prototype.getCallbackURL = function() {
   return this._callbackURL;
 };
 
-Wemo.prototype.client = function(device, log) {
+Wemo.prototype.client = function(device) {
   if (this._clients[device.UDN]) {
     return this._clients[device.UDN];
   }
 
-  var client = this._clients[device.UDN] = new WemoClient(device, log);
+  var client = this._clients[device.UDN] = new WemoClient(device);
   return client;
 };

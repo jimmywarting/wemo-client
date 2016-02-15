@@ -14,9 +14,8 @@ function mapCapabilities(capabilityIds, capabilityValues) {
   return result;
 }
 
-var WemoClient = module.exports = function(config, log) {
+var WemoClient = module.exports = function(config) {
   EventEmitter.call(this);
-  this.log = log || debug;
   this.host = config.host;
   this.port = config.port;
   this.deviceType = config.deviceType;
@@ -161,6 +160,7 @@ WemoClient.prototype.getEndDevices = function(cb) {
   var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
   this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
 };
+
 WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb) {
   var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
   var body = [
@@ -219,7 +219,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     return;
   }
   if (this.subscriptions[serviceType] && this.subscriptions[serviceType] === 'PENDING') {
-    debug('PENDING - returning');
+    debug('subscription still pending');
     return;
   }
 
@@ -261,11 +261,11 @@ WemoClient.prototype._subscribe = function(serviceType) {
     // EHOSTUNREACH suggests the device has gone (switched off maybe)
     // ETIMEDOUT    seems to be recoverable - just lost it for a bit, we'll retry.
     var timeout = 5; // seconds before we retry
-    self.log('HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.',
+    debug('HTTP Error (%s) occurred (re)subscribing to Wemo Device (%s - %s:%s), retrying.',
       err.code, self.device.friendlyName, self.device.host, self.device.port, self.UDN);
-    if (err.code === 'ECONNREFUSED') { // try the alternate port that wemo tends to use.
+    if (err.code === 'ECONNREFUSED') { // try the alternate port that wemo tends to use. See #21
       (self.port === '49154') ? self.port = '49153' : self.port = '49154' ;
-      self.log('Trying port: %s', self.port);
+      debug('Trying port: %s', self.port);
       timeout = 1; // may as well try the new port sooner than later
     }
     this.subscriptions[serviceType] = null; // reset expectations about the presence of this device
