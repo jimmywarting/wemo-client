@@ -30,8 +30,8 @@
     "wemo"
   ],
   "dependencies": {
-    "node-ssdp": "~2.6.5",
-    "xml2js": "~0.4.15",
+    "node-ssdp": "~2.7.0",
+    "xml2js": "~0.4.16",
     "debug": "~2.2.0"
   },
   "devDependencies": {
