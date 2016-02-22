@@ -9,6 +9,7 @@ var WemoClient = require('./client');
 var Wemo = module.exports = function() {
   this._clients = {};
   this._listen();
+  this._ssdpClient = new SSDPClient();
 };
 
 Wemo.DEVICE_TYPE = {
@@ -47,15 +48,15 @@ Wemo.prototype.load = function(setupUrl, cb) {
   });
 };
 
+// DEPRECATED: cb is replaced with event in 1.0
 Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
     self.load(msg.LOCATION, cb);
   };
 
-  var ssdpClient = new SSDPClient();
-  ssdpClient.on('response', handleResponse);
-  ssdpClient.search('urn:Belkin:service:basicevent:1');
+  this._ssdpClient.on('response', handleResponse);
+  this._ssdpClient.search('urn:Belkin:service:basicevent:1');
 };
 
 Wemo.prototype._listen = function() {
@@ -111,6 +112,7 @@ Wemo.prototype.getCallbackURL = function() {
   return this._callbackURL;
 };
 
+// DEPRECATED: Removed in 1.0
 Wemo.prototype.client = function(device) {
   if (this._clients[device.UDN]) {
     return this._clients[device.UDN];
