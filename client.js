@@ -297,7 +297,8 @@ WemoClient.prototype.handleCallback = function(body) {
       var insightParams = {
         ONSince: params[1],
         OnFor: params[2],
-        TodayONTime: params[3]
+        TodayONTime: params[3],
+        TodayConsumed: params[8]  // power consumer today (mW per minute)
       };
       self.emit('insightParams',
         params[0], // binary state
