@@ -105,6 +105,7 @@ describe('WemoClient', function() {
         data.must.have.property('ONSince', '1450460139');
         data.must.have.property('OnFor', '6511');
         data.must.have.property('TodayONTime', '0');
+        data.must.have.property('TodayConsumed', '551366');
         done();
       });
       var fixture = fs.readFileSync(__dirname + '/fixtures/insightParamsEvent.xml');
