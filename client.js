@@ -67,10 +67,6 @@ WemoClient.request = function(options, data, cb) {
       cb(err);
     });
   });
-  req.setTimeout(3000, function() {  // 3 seconds to respond so we're inside the homekit wait
-    req.abort();
-    debug('Error on http.request.req: Timed out!');
-  });
   req.on('error', function(err) {
     debug('Error on http.request.req:', err);
     cb(err);

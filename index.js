@@ -31,7 +31,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
     path: location.path,
     method: 'GET'
   }, function(err, json) {
-    if (!err) {
+    if (!err && json) {
       var device = json.root.device;
       device.host = location.hostname;
       device.port = location.port;
@@ -48,7 +48,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
   });
 };
 
-// DEPRECATED: cb is replaced with event in 1.0
+// DEPRECATED: cb is replaced with event in 0.7
 Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
