@@ -61,7 +61,7 @@ Static map of supported models and device types.
 * Motion
 * Maker
 * Insight
-* LightSwith
+* LightSwitch
 
 #### discover(cb)
 
