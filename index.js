@@ -55,6 +55,7 @@ Wemo.prototype.discover = function(cb) {
     self.load(msg.LOCATION, cb);
   };
 
+  this._ssdpClient.removeAllListeners('response');
   this._ssdpClient.on('response', handleResponse);
   this._ssdpClient.search('urn:Belkin:service:basicevent:1');
 };
