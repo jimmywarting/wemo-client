@@ -60,7 +60,11 @@ WemoClient.request = function(options, data, cb) {
       body += chunk;
     });
     res.on('end', function() {
-      xml2js.parseString(body, { explicitArray: false }, cb);
+      if (res.statusCode === 200) {
+        xml2js.parseString(body, { explicitArray: false }, cb);
+      } else {
+        cb(new Error('HTTP ' + res.statusCode + ': ' + body));
+      }
     });
     res.on('error', function(err) {
       debug('Error on http.request.res:', err);
