@@ -10,10 +10,11 @@ function foundDevice(device) {
       console.log('Wemo Maker "%s" changed %s to %s', this.device.friendlyName, name, value);
     });
 
-    // Close the switch after 3 seconds
-    setTimeout(function() {
-      client.setBinaryState(1);
-    }, 3 * 1000);
+    client.getAttributes(function(err, attributes) {
+      if (!err) {
+        console.log('Wemo Maker attributes:', attributes);
+      }
+    });
   }
 
 }

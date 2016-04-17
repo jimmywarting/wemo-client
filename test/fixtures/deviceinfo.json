@@ -2,7 +2,7 @@
   "host": "192.168.1.1",
   "port": "49153",
   "deviceType": "urn:Belkin:device:controllee:1",
-  "friendlyName": "WeMo Switch",
+  "friendlyName": "WeMo Mock Device",
   "manufacturer": "Belkin International Inc.",
   "manufacturerURL": "http://www.belkin.com",
   "modelDescription": "Belkin Plugin Socket 1.0",
@@ -80,6 +80,12 @@
       "controlURL": "/upnp/control/deviceinfo1",
       "eventSubURL": "/upnp/event/deviceinfo1",
       "SCPDURL": "/deviceinfoservice.xml"
+  }, {
+      "serviceType": "urn:Belkin:service:deviceevent:1",
+      "serviceId": "urn:Belkin:serviceId:deviceevent1",
+      "controlURL": "/upnp/control/deviceevent1",
+      "eventSubURL": "/upnp/event/deviceevent1",
+      "SCPDURL": "/deviceeventervice.xml"
   }, {
       "serviceType": "urn:Belkin:service:smartsetup:1",
       "serviceId": "urn:Belkin:serviceId:smartsetup1",

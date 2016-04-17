@@ -194,6 +194,24 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('#getAttributes(cb)', function() {
+    it('must callback with device attributes', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getAttributes.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getAttributes(function(err, attributes) {
+        demand(err).to.be.falsy();
+        attributes.must.have.property('Switch', '0');
+        attributes.must.have.property('Sensor', '1');
+        attributes.must.have.property('SwitchMode', '0');
+        attributes.must.have.property('SensorPresent', '1');
+        done();
+      });
+    });
+  });
+
   describe('#getDeviceStatus(deviceId, cb)', function() {
     it('must callback with a deviceStatus', function(done) {
       mitm.on('request', function(req, res) {

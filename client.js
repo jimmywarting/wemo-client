@@ -1,6 +1,7 @@
 var util = require('util');
 var http = require('http');
 var xml2js = require('xml2js');
+var entities = require('entities');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('wemo-client');
 
@@ -199,6 +200,22 @@ WemoClient.prototype.getBinaryState = function(cb) {
   this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, function(err, data) {
     if (err) return cb(err);
     cb(null, data.BinaryState);
+  });
+};
+
+WemoClient.prototype.getAttributes = function(cb) {
+  this.soapAction('urn:Belkin:service:deviceevent:1', 'GetAttributes', null, function(err, data) {
+    if (err) return cb(err);
+    var xml = '<attributeList>' + entities.decodeXML(data.attributeList) + '</attributeList>';
+    xml2js.parseString(xml, { explicitArray: false }, function(err, result) {
+      if (err) return cb(err);
+      var attributes = {};
+      for (var key in result.attributeList.attribute) {
+        var attribute = result.attributeList.attribute[key];
+        attributes[attribute.name] = attribute.value;
+      }
+      cb(null, attributes);
+    });
   });
 };
 

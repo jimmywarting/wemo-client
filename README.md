@@ -157,6 +157,12 @@ Turn the device on or off. Will also cause a `binaryState` event to be triggered
 * **String** *value* `1` = on, `0` = off
 * **Callback** *cb* cb(err, response)
 
+#### getAttributes(cb)
+
+Get the device attributes of a Wemo Maker.
+
+* **Callback** *cb* cb(err, attributes)
+
 #### getDeviceStatus(deviceId, cb)
 
 Gets the device Status of a device connected via Wemo Bridge, e.g. a bulb.

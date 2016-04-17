@@ -30,9 +30,10 @@
     "wemo"
   ],
   "dependencies": {
+    "debug": "~2.2.0",
+    "entities": "^1.1.1",
     "node-ssdp": "~2.7.0",
-    "xml2js": "~0.4.16",
-    "debug": "~2.2.0"
+    "xml2js": "~0.4.16"
   },
   "devDependencies": {
     "codeclimate-test-reporter": "^0.1.1",
