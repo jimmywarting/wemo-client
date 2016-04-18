@@ -324,14 +324,19 @@ WemoClient.prototype.handleCallback = function(body) {
       );
     },
     attributeList: function(data) {
-      xml2js.parseString(data, { explicitArray: false }, function(err, xml) {
+      var xml = '<attributeList>' + entities.decodeXML(data) + '</attributeList>';
+      xml2js.parseString(xml, { explicitArray: true }, function(err, result) {
         if (!err) {
-          self.emit('attributeList',
-            xml.attribute.name,
-            xml.attribute.value,
-            xml.attribute.prevalue,
-            xml.attribute.ts
-          );
+          // In order to keep the existing event signature this
+          // triggers an event for every attribute changed.
+          result.attributeList.attribute.forEach(function(attribute) {
+            self.emit('attributeList',
+              attribute.name[0],
+              attribute.value[0],
+              attribute.prevalue[0],
+              attribute.ts[0]
+            );
+          });
         }
       });
     }

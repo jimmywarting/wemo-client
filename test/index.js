@@ -115,12 +115,25 @@ describe('WemoClient', function() {
 
   describe('Event: attributeList', function() {
     it('must emit attributeList events', function(done) {
+      var event = [];
       client.on('attributeList', function(name, value, prevalue, ts) {
-        name.must.be('Switch');
-        value.must.be('1');
-        prevalue.must.be('0');
-        ts.must.be('1450733524');
-        done();
+        event.push({
+          name: name,
+          value: value,
+          prevalue: prevalue,
+          ts: ts
+        });
+        if (event.length == 2) {
+          event[0].name.must.be('Switch');
+          event[0].value.must.be('1');
+          event[0].prevalue.must.be('0');
+          event[0].ts.must.be('1450733524');
+          event[1].name.must.be('Sensor');
+          event[1].value.must.be('0');
+          event[1].prevalue.must.be('1');
+          event[1].ts.must.be('1450733524');
+          done();
+        }
       });
       var fixture = fs.readFileSync(__dirname + '/fixtures/attributeListEvent.xml');
       client.handleCallback(fixture);

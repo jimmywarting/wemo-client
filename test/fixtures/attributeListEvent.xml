@@ -1,5 +1,18 @@
 <e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0">
   <e:property>
-    <attributeList>&lt;attribute&gt;&lt;name&gt;Switch&lt;/name&gt;&lt;value&gt;1&lt;/value&gt;&lt;prevalue&gt;0&lt;/prevalue&gt;&lt;ts&gt;1450733524&lt;/ts&gt;&lt;/attribute&gt;</attributeList>
+    <attributeList>
+      &lt;attribute&gt;
+        &lt;name&gt;Switch&lt;/name&gt;
+        &lt;value&gt;1&lt;/value&gt;
+        &lt;prevalue&gt;0&lt;/prevalue&gt;
+        &lt;ts&gt;1450733524&lt;/ts&gt;
+      &lt;/attribute&gt;
+      &lt;attribute&gt;
+        &lt;name&gt;Sensor&lt;/name&gt;
+        &lt;value&gt;0&lt;/value&gt;
+        &lt;prevalue&gt;1&lt;/prevalue&gt;
+        &lt;ts&gt;1450733524&lt;/ts&gt;
+      &lt;/attribute&gt;
+    </attributeList>
   </e:property>
 </e:propertyset>
