@@ -121,6 +121,14 @@ Wemo Insight Switch sent new power consumption data.
 * **String** *instantPower* Current power consumption in mW
 * **Object** *data* Aggregated usage data
 
+#### Event: error (err)
+
+An error occured while handling the event subscriptions or calling a device action.
+When `err.code` is one of `ECONNREFUSED`, `EHOSTUNREACH` or `ETIMEDOUT` the device
+likely went offline.
+
+* **Object** *err*
+
 #### getEndDevices(cb)
 
 Get bulbs connected to a Wemo Bridge. An `endDeviceInfo` for every device paired is passed to the callback in an array, e.g.:

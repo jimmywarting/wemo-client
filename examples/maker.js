@@ -15,6 +15,10 @@ function foundDevice(device) {
         console.log('Wemo Maker attributes:', attributes);
       }
     });
+
+    client.on('error', function(err) {
+      console.log('Error: %s', err.code);
+    });
   }
 
 }

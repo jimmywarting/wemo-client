@@ -48,7 +48,6 @@ Wemo.prototype.load = function(setupUrl, cb) {
   });
 };
 
-// DEPRECATED: cb is replaced with event in 0.7
 Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
@@ -113,9 +112,8 @@ Wemo.prototype.getCallbackURL = function() {
   return this._callbackURL;
 };
 
-// DEPRECATED: Removed in 1.0
 Wemo.prototype.client = function(device) {
-  if (this._clients[device.UDN]) {
+  if (this._clients[device.UDN] && !this._clients[device.UDN].error) {
     return this._clients[device.UDN];
   }
 
