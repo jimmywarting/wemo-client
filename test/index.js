@@ -321,6 +321,26 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('#getInsightParams(cb)', function() {
+    it('must callback with an insightParams value', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getInsightParams.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getInsightParams(function(err, binaryState, instantPower, data) {
+        demand(err).to.be.falsy();
+        binaryState.must.be('8');
+        instantPower.must.be('410');
+        data.must.have.property('ONSince', '1450460139');
+        data.must.have.property('OnFor', '6511');
+        data.must.have.property('TodayONTime', '0');
+        data.must.have.property('TodayConsumed', '551366');
+        done();
+      });
+    });
+  });
+
   describe('#on(binaryState)', function() {
     it('must send a event subscription request', function(done) {
       mitm.on('request', function(req, res) {

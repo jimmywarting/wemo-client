@@ -98,6 +98,12 @@
       "controlURL": "/upnp/control/manufacture1",
       "eventSubURL": "/upnp/event/manufacture1",
       "SCPDURL": "/manufacture.xml"
+  }, {
+      "serviceType": "urn:Belkin:service:insight:1",
+      "serviceId": "urn:Belkin:serviceId:insight1",
+      "controlURL": "/upnp/control/insight1",
+      "eventSubURL": "/upnp/event/insight1",
+      "SCPDURL": "/insightservice.xml"
   }]
   },
   "presentationURL": "/pluginpres.html"
