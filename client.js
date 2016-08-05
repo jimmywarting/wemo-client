@@ -224,11 +224,35 @@ WemoClient.prototype.getAttributes = function(cb) {
   });
 };
 
+WemoClient.prototype.getInsightParams = function(cb) {
+  this.soapAction('urn:Belkin:service:insight:1', 'GetInsightParams', null, function(err, data) {
+    if (err) return cb(err);
+
+    var params = this._parseInsightParams(data.InsightParams);
+    cb(null, params.binaryState, params.instantPower, params.insightParams);
+  }.bind(this));
+};
+
 WemoClient.prototype._onListenerAdded = function(eventName) {
   var serviceType = WemoClient.EventServices[eventName];
   if (serviceType && this.services[serviceType]) {
     this._subscribe(serviceType);
   }
+};
+
+WemoClient.prototype._parseInsightParams = function(paramsStr) {
+  var params = paramsStr.split('|');
+
+  return {
+    binaryState: params[0],
+    instantPower: params[7],
+    insightParams: {
+      ONSince: params[1],
+      OnFor: params[2],
+      TodayONTime: params[3],
+      TodayConsumed: params[8]  // power consumer today (mW per minute)
+    }
+  };
 };
 
 WemoClient.prototype._subscribe = function(serviceType) {
@@ -301,19 +325,9 @@ WemoClient.prototype.handleCallback = function(body) {
       });
     },
     InsightParams: function(data) {
-      var params = data.split('|');
-      var insightParams = {
-        ONSince: params[1],
-        OnFor: params[2],
-        TodayONTime: params[3],
-        TodayConsumed: params[8]  // power consumer today (mW per minute)
-      };
-      self.emit('insightParams',
-        params[0], // binary state
-        params[7], // instant power
-        insightParams
-      );
-    },
+      var params = this._parseInsightParams(data);
+      self.emit('insightParams', params.binaryState, params.instantPower, params.insightParams);
+    }.bind(this),
     attributeList: function(data) {
       var xml = '<attributeList>' + entities.decodeXML(data) + '</attributeList>';
       xml2js.parseString(xml, { explicitArray: true }, function(err, result) {

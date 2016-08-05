@@ -214,6 +214,14 @@ Convenience function for setting the color of a RGB light.
 * **Number** *blue* 0-255
 * **Callback** *cb* cb(err, response)
 
+#### getInsightParams(cb)
+
+Get power consumption data for a Wemo Insight Switch
+
+* **Callback** *cb* cb(err, binaryState, instantPower, data)
+
+The callback is passed the `binaryState`, `instantPower` and `data` (see [Event: InsightParams](#event-insightparams-binarystate-instantpower-data))
+
 ## Debugging
 
 Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `wemo-client`.
