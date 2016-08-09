@@ -14,7 +14,7 @@
         "global-require": 1,
         "consistent-return": 1,
         "valid-jsdoc": 1,
-        "space-after-keywords": 1,
+        "keyword-spacing": 1,
         "object-curly-spacing": [1, "always"],
         "no-spaced-func": 1,
         "no-trailing-spaces": 1,

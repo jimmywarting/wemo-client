@@ -37,11 +37,11 @@
   },
   "devDependencies": {
     "codeclimate-test-reporter": "^0.1.1",
-    "eslint": "^1.10.3",
+    "eslint": "^3.2.2",
     "husky": "^0.10.2",
-    "istanbul": "~0.3.17",
-    "mitm": "~1.1.0",
-    "mocha": "~2.3.3",
-    "must": "~0.12.0"
+    "istanbul": "^0.4.4",
+    "mitm": "^1.2.1",
+    "mocha": "^3.0.2",
+    "must": "^0.13.2"
   }
 }
