@@ -12,7 +12,6 @@
         "no-unused-vars": [2, {"vars": "all", "args": "none"}],
         "handle-callback-err": 1,
         "global-require": 1,
-        "consistent-return": 1,
         "valid-jsdoc": 1,
         "keyword-spacing": 1,
         "object-curly-spacing": [1, "always"],
