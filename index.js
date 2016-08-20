@@ -37,8 +37,8 @@ Wemo.prototype.load = function(setupUrl, cb) {
       device.port = location.port;
       device.callbackURL = self.getCallbackURL();
 
-      // Return only matching devices and return them only once!
-      if (!self._clients[device.UDN] && device.deviceType.match(/^urn:Belkin:device/)) {
+      // Return only matching devices
+      if (device.deviceType.match(/^urn:Belkin:device/)) {
         debug('Found device: %j', json);
         if (cb) {
           cb.call(self, device);
