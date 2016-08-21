@@ -4,6 +4,7 @@ var xml2js = require('xml2js');
 var entities = require('entities');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('wemo-client');
+var xmlbuilder = require('xmlbuilder');
 
 function mapCapabilities(capabilityIds, capabilityValues) {
   var ids = capabilityIds.split(',');
@@ -86,9 +87,18 @@ WemoClient.request = function(options, data, cb) {
 WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
   cb = cb || function() {};
 
-  var payload = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>';
-  payload += util.format('<u:%s xmlns:u="%s">%s</u:%s>', action, serviceType, body, action);
-  payload += '</s:Body></s:Envelope>';
+  var xml = xmlbuilder.create('s:Envelope', {
+    version: '1.0',
+    encoding: 'utf-8',
+    allowEmpty: true
+  })
+  .att('xmlns:s', 'http://schemas.xmlsoap.org/soap/envelope/')
+  .att('s:encodingStyle', 'http://schemas.xmlsoap.org/soap/encoding/')
+  .ele('s:Body')
+  .ele('u:' + action)
+  .att('xmlns:u', serviceType);
+
+  var payload = body ? xml.ele(body).end() : xml.end();
 
   var options = {
     host: this.host,
@@ -163,18 +173,28 @@ WemoClient.prototype.getEndDevices = function(cb) {
     });
   };
 
-  var body = '<DevUDN>%s</DevUDN><ReqListType>PAIRED_LIST</ReqListType>';
-  this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', util.format(body, this.UDN), parseResponse);
+  this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', {
+    DevUDN: this.UDN,
+    ReqListType: 'PAIRED_LIST'
+  }, parseResponse);
 };
 
 WemoClient.prototype.setDeviceStatus = function(deviceId, capability, value, cb) {
-  var isGroupAction = (deviceId.length === 10) ? 'YES' : 'NO';
-  var body = [
-    '<DeviceStatusList>',
-    '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;%s&lt;/IsGroupAction&gt;&lt;DeviceID available=&quot;YES&quot;&gt;%s&lt;/DeviceID&gt;&lt;CapabilityID&gt;%s&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;%s&lt;/CapabilityValue&gt;&lt;/DeviceStatus&gt;',
-    '</DeviceStatusList>'
-  ].join('\n');
-  this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', util.format(body, isGroupAction, deviceId, capability, value), cb);
+  var deviceStatusList = xmlbuilder.create('DeviceStatus', {
+    version: '1.0',
+    encoding: 'utf-8'
+  }).ele({
+    IsGroupAction: (deviceId.length === 10) ? 'YES' : 'NO',
+    DeviceID: deviceId,
+    CapabilityID: capability,
+    CapabilityValue: value
+  }).end();
+
+  this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', {
+    DeviceStatusList: {
+      '#text': deviceStatusList
+    }
+  }, cb);
 };
 
 WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
@@ -187,8 +207,10 @@ WemoClient.prototype.getDeviceStatus = function(deviceId, cb) {
       cb(null, capabilities);
     });
   };
-  var body = '<DeviceIDs>%s</DeviceIDs>';
-  this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', util.format(body, deviceId), parseResponse);
+
+  this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', {
+    DeviceIDs: deviceId
+  }, parseResponse);
 };
 
 WemoClient.prototype.setLightColor = function(deviceId, red, green, blue, cb) {
@@ -197,8 +219,9 @@ WemoClient.prototype.setLightColor = function(deviceId, red, green, blue, cb) {
 };
 
 WemoClient.prototype.setBinaryState = function(value, cb) {
-  var body = '<BinaryState>%s</BinaryState>';
-  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', util.format(body, value), cb);
+  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+    BinaryState: value
+  }, cb);
 };
 
 WemoClient.prototype.getBinaryState = function(cb) {

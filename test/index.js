@@ -148,7 +148,7 @@ describe('WemoClient', function() {
         res.statusCode = 200;
         res.end();
       });
-      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', 'TheBody', done);
+      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', { TheBody: 'Foo' }, done);
     });
 
     it('must send a soap header', function(done) {
@@ -157,7 +157,7 @@ describe('WemoClient', function() {
         res.statusCode = 200;
         res.end();
       });
-      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', 'TheBody', done);
+      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', { TheBody: 'Foo' }, done);
     });
 
     it('must send a valid body', function(done) {
@@ -165,13 +165,13 @@ describe('WemoClient', function() {
         req.on('data', function(chunk) {
           var data = chunk.toString();
           data.must.contain('<u:TheAction xmlns:u="urn:Belkin:service:deviceinfo:1">');
-          data.must.contain('TheBody');
+          data.must.contain('<TheBody>Foo</TheBody>');
           done();
         });
         res.statusCode = 200;
         res.end();
       });
-      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', 'TheBody');
+      client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', { TheBody: 'Foo' });
     });
   });
 
@@ -252,7 +252,7 @@ describe('WemoClient', function() {
           data.must.contain('<u:SetDeviceStatus xmlns:u="urn:Belkin:service:bridge:1">');
           data.must.contain('<DeviceStatusList>');
           data.must.contain('&lt;IsGroupAction&gt;YES&lt;/IsGroupAction&gt;');
-          data.must.contain('&lt;DeviceID available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;');
+          data.must.contain('&lt;DeviceID&gt;1432253402&lt;/DeviceID&gt;');
           data.must.contain('&lt;CapabilityID&gt;10006&lt;/CapabilityID&gt;');
           data.must.contain('&lt;CapabilityValue&gt;1&lt;/CapabilityValue&gt;');
           done();
@@ -270,7 +270,7 @@ describe('WemoClient', function() {
       mitm.on('request', function(req, res) {
         req.on('data', function(chunk) {
           var data = chunk.toString();
-          data.must.contain('&lt;DeviceID available=&quot;YES&quot;&gt;1432253402&lt;/DeviceID&gt;');
+          data.must.contain('&lt;DeviceID&gt;1432253402&lt;/DeviceID&gt;');
           data.must.contain('&lt;CapabilityID&gt;10300&lt;/CapabilityID&gt;');
           data.must.contain('&lt;CapabilityValue&gt;45968:17936:0&lt;/CapabilityValue&gt;');
           done();
