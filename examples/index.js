@@ -22,8 +22,3 @@ function foundDevice(deviceInfo) {
 
 // Inital discovery
 wemo.discover(foundDevice);
-
-// Repeat discovery as some devices may appear late
-setInterval(function() {
-  wemo.discover(foundDevice);
-}, 15000);
