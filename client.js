@@ -98,7 +98,7 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
   .ele('u:' + action)
   .att('xmlns:u', serviceType);
 
-  var payload = body ? xml.ele(body).end() : xml.end();
+  var payload = (body ? xml.ele(body) : xml).end();
 
   var options = {
     host: this.host,
@@ -256,13 +256,6 @@ WemoClient.prototype.getInsightParams = function(cb) {
   }.bind(this));
 };
 
-WemoClient.prototype._onListenerAdded = function(eventName) {
-  var serviceType = WemoClient.EventServices[eventName];
-  if (serviceType && this.services[serviceType]) {
-    this._subscribe(serviceType);
-  }
-};
-
 WemoClient.prototype._parseInsightParams = function(paramsStr) {
   var params = paramsStr.split('|');
 
@@ -276,6 +269,13 @@ WemoClient.prototype._parseInsightParams = function(paramsStr) {
       TodayConsumed: params[8]  // power consumer today (mW per minute)
     }
   };
+};
+
+WemoClient.prototype._onListenerAdded = function(eventName) {
+  var serviceType = WemoClient.EventServices[eventName];
+  if (serviceType && this.services[serviceType]) {
+    this._subscribe(serviceType);
+  }
 };
 
 WemoClient.prototype._subscribe = function(serviceType) {
