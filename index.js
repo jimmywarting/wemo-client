@@ -39,7 +39,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
 
       // Return only matching devices and return them only once!
       if (!device.deviceType.match(/^urn:Belkin:device/)) return;
-      if (!self._clients[device.UDN] || this._clients[device.UDN].error) {
+      if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
         debug('Found device: %j', json);
         if (cb) {
           cb.call(self, device);
