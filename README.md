@@ -67,6 +67,10 @@ Discover Wemo devices via UPnP. A `deviceInfo` will be passed to `cb` that can b
 
 * **Callback** *cb* Callback called with for every single device found.
 
+Due to the nature of UPnP it may be required to call this method multiple times to discover actually all devices connected to the local network.
+
+The callback will only be called for newly found devices (those that have not been detected by a previous call to `discover`). Except for devices that have been lost in an error state as those will reappear again when coming back online (e.g. because their IP/port have changed).
+
 #### load(setupUrl, cb)
 
 Allows to skip discovery if the `setupUrl` of a Wemo is already known. A `deviceInfo` will be passed to `cb` that can be used to get a client for the device found.
