@@ -6,10 +6,13 @@ var debug = require('debug')('wemo-client');
 
 var WemoClient = require('./client');
 
-var Wemo = module.exports = function() {
+var Wemo = module.exports = function(opts) {
+  opts = opts || {};
+  this._port = opts.port || 0;
+
   this._clients = {};
   this._listen();
-  this._ssdpClient = new SSDPClient();
+  this._ssdpClient = new SSDPClient(opts.discover_opts || {});
 };
 
 Wemo.DEVICE_TYPE = {
@@ -62,7 +65,7 @@ Wemo.prototype.discover = function(cb) {
 
 Wemo.prototype._listen = function() {
   this._server = http.createServer(this._handleRequest.bind(this));
-  this._server.listen(0, function(err) {
+  this._server.listen(this._port, function(err) {
     if (err) {
       throw err;
     }

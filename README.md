@@ -50,6 +50,23 @@ wemo.discover(function(deviceInfo) {
 
 ### Wemo
 
+#### new Wemo([opts])
+
+Create the Wemo instance. An optional object containing options can be specified. Available options include `port` which will provide a port to bind to for listening to UPnP events (the default is to listen on any available randomly selected port.) Discovery options for `node-ssdp` can also be specified as `discover_opts`.
+
+Example of options:
+
+```
+{
+  port: 1234,
+  discover_opts: {
+    unicastBindPort: 1235
+  }
+}
+```
+
+* **Object** *options* Options
+
 #### DEVICE_TYPE
 
 Static map of supported models and device types.
