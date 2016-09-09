@@ -1,7 +1,7 @@
 {
   "name": "wemo-client",
   "version": "0.10.0",
-  "description": "JavaScript client library for controlling and subscribing to Wemo Devices",
+  "description": "Client library for interacting with Belkin Wemo devices",
   "main": "index.js",
   "directories": {
     "examples": "./examples"
