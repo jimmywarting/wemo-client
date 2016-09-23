@@ -40,8 +40,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
       device.port = location.port;
       device.callbackURL = self.getCallbackURL();
 
-      // Return only matching devices and return them only once!
-      if (!device.deviceType.match(/^urn:Belkin:device/)) return;
+      // Return devices only once!
       if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
         debug('Found device: %j', json);
         if (cb) {
@@ -55,7 +54,9 @@ Wemo.prototype.load = function(setupUrl, cb) {
 Wemo.prototype.discover = function(cb) {
   var self = this;
   var handleResponse = function(msg, statusCode, rinfo) {
-    self.load(msg.LOCATION, cb);
+    if (msg.ST && msg.ST === 'urn:Belkin:service:basicevent:1') {
+      self.load(msg.LOCATION, cb);
+    }
   };
 
   this._ssdpClient.removeAllListeners('response');
