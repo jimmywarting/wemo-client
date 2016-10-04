@@ -250,6 +250,21 @@ Wemo Client uses [debug](https://github.com/visionmedia/debug), so just run with
 ```bash
 $ env DEBUG=wemo-client node examples/index.js
 ```
+## Known Issues
+
+There are some quirks and oddities to be aware of when working with the devices supported by this library.
+
+### General
+
+* The `deviceInfo` returned from the discovery may contain a device state property (e.g. `binaryState`) which has an outdated value most of the time. Just don't use it.
+
+### Wemo Link
+
+* The `capabilities` property of the `endDeviceInfo` may represent outdated values. Please use the `getDeviceStatus` method or subscribe to `statusChange` events to obtain the current state of the device.
+
+* Setting capability `10008` (level/brightness) to `> 0` will turn the light on, but won't update capability `10006` (on/off). In other words, a light turned on by dimming it, will still be reported as off by the `deviceStatus`.
+
+* Setting capability `10008` to `0` will turn the light off, but won't cause _any update_ of the `deviceStatus`. That is the light will still be reported as on and dimmed.
 
 ## Contributing
 
