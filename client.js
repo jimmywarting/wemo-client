@@ -283,8 +283,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
   }
   if (!this.callbackURL) {
-    debug('no callback URL - returning');
-    return;
+    throw new Error('Can not subscribe without callbackURL');
   }
   if (this.subscriptions[serviceType] && this.subscriptions[serviceType] === 'PENDING') {
     debug('subscription still pending');
@@ -297,7 +296,7 @@ WemoClient.prototype._subscribe = function(serviceType) {
     path: this.services[serviceType].eventSubURL,
     method: 'SUBSCRIBE',
     headers: {
-      TIMEOUT: 'Second-130'
+      TIMEOUT: 'Second-300'
     }
   };
 
@@ -314,9 +313,15 @@ WemoClient.prototype._subscribe = function(serviceType) {
   }
 
   var req = http.request(options, function(res) {
-    if (res.headers.sid) {
+    if (res.statusCode === 200) {
+      // Renew after 150 seconds
       this.subscriptions[serviceType] = res.headers.sid;
-      setTimeout(this._subscribe.bind(this), 120 * 1000, serviceType);
+      setTimeout(this._subscribe.bind(this), 150 * 1000, serviceType);
+    } else {
+      // Try to recover from failed subscription after 2 seconds
+      debug('Subscription request failed with HTTP %s', res.statusCode);
+      this.subscriptions[serviceType] = null;
+      setTimeout(this._subscribe.bind(this), 2000, serviceType);
     }
   }.bind(this));
 

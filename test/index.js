@@ -20,6 +20,7 @@ describe('Wemo', function() {
     var wemo = new Wemo();
     var client = wemo.client(deviceInfo);
     var address = url.parse(wemo.getCallbackURL());
+    client.callbackURL = address
 
     client.on('binaryState', function(state) {
       state.must.be('1');
@@ -67,6 +68,7 @@ describe('WemoClient', function() {
   beforeEach(function() {
     mitm = Mitm();
     client = (new Wemo()).client(deviceInfo);
+    client.callbackURL = 'http://localhost'
   });
 
   afterEach(function() {
