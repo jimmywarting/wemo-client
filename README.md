@@ -268,7 +268,7 @@ There are some quirks and oddities to be aware of when working with the devices 
 
 ## Contributing
 
-Contributions are very welcome! Please note that by submitting a pull request for this project, you agree to license your contribution under the [MIT License](https://github.com/timonreinhard/wemo-client/blob/master/LICENSE) to this project.
+Contributions are very welcome! Please note that by submitting a pull request for this project, you agree to license your contribution under the [MIT License](LICENSE) to this project.
 
 ## Credits
 
@@ -276,4 +276,4 @@ Credit goes to [Ben Hardill](http://www.hardill.me.uk/wordpress/tag/wemo/) for h
 
 ## License
 
-Published under the [MIT License](https://github.com/timonreinhard/wemo-client/blob/master/LICENSE).
+Published under the [MIT License](LICENSE).
