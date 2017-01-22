@@ -36,6 +36,12 @@ wemo.discover(function(deviceInfo) {
   // Get the client for the found device
   var client = wemo.client(deviceInfo);
 
+  // You definitely want to listen to error events (e.g. device went offline),
+  // Node will throw them as an exception if they are left unhandled  
+  client.on('error', function(err) {
+    console.log('Error: %s', err.code);
+  });
+
   // Handle BinaryState events
   client.on('binaryState', function(value) {
     console.log('Binary State changed to: %s', value);
@@ -103,6 +109,16 @@ Get a single instance of [WemoClient](#wemoclient) for the device specified by `
 
 ### WemoClient
 
+#### Event: error (err)
+
+An error occured while handling the event subscriptions or calling a device action.
+When `err.code` is one of `ECONNREFUSED`, `EHOSTUNREACH` or `ETIMEDOUT` the device
+likely went offline.
+
+* **Object** *err*
+
+*When using any subscriptions, make sure to also listen to `error` events. Node will **throw** an exception if error events are left unhandled. See also: [Building Robust Node Applications: Error Handling](https://strongloop.com/strongblog/robust-node-applications-error-handling/)*
+
 #### Event: binaryState (value)
 
 Binary state of a device has been updated, e.g. a motion sensor detected motion or a plug is switched on.
@@ -139,14 +155,6 @@ Wemo Insight Switch sent new power consumption data.
 * **String** *binaryState* `1` = on, `0` = off, `8` = standby
 * **String** *instantPower* Current power consumption in mW
 * **Object** *data* Aggregated usage data
-
-#### Event: error (err)
-
-An error occured while handling the event subscriptions or calling a device action.
-When `err.code` is one of `ECONNREFUSED`, `EHOSTUNREACH` or `ETIMEDOUT` the device
-likely went offline.
-
-* **Object** *err*
 
 #### getEndDevices(cb)
 
