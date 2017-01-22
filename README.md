@@ -117,7 +117,7 @@ likely went offline.
 
 * **Object** *err*
 
-*When using any subscriptions, make sure to also listen to `error` events. Node will **throw** an exception if error events are left unhandled. See also: [Building Robust Node Applications: Error Handling](https://strongloop.com/strongblog/robust-node-applications-error-handling/)*
+_When using any subscriptions, make sure to also listen to `error` events. Node will **throw** an exception if error events are left unhandled. See also: [Building Robust Node Applications: Error Handling](https://strongloop.com/strongblog/robust-node-applications-error-handling/)_
 
 #### Event: binaryState (value)
 
