@@ -9,6 +9,7 @@ var WemoClient = require('./client');
 var Wemo = module.exports = function(opts) {
   opts = opts || {};
   this._port = opts.port || 0;
+  this._callbackInterface = opts.callback_interface;
 
   this._clients = {};
   this._listen();
@@ -95,8 +96,16 @@ Wemo.prototype._handleRequest = function(req, res) {
 };
 
 Wemo.prototype.getCallbackURL = function() {
+  var self = this;
   var getLocalInterfaceAddress = function() {
     var interfaces = os.networkInterfaces();
+    if (self._callbackInterface) {
+      if (interfaces[self._callbackInterface]) {
+        interfaces = [interfaces[self._callbackInterface]];
+      } else {
+        throw new Error('Unable to find callback interface ' + self._callbackInterface);
+      }
+    }
     var addresses = [];
     for (var k in interfaces) {
       for (var k2 in interfaces[k]) {
