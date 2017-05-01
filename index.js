@@ -9,7 +9,7 @@ var WemoClient = require('./client');
 var Wemo = module.exports = function(opts) {
   opts = opts || {};
   this._port = opts.port || 0;
-  this._callbackInterface = opts.callback_interface;
+  this._listenInterface = opts.listen_interface;
 
   this._clients = {};
   this._listen();
@@ -66,12 +66,18 @@ Wemo.prototype.discover = function(cb) {
 };
 
 Wemo.prototype._listen = function() {
-  this._server = http.createServer(this._handleRequest.bind(this));
-  this._server.listen(this._port, function(err) {
+  var serverCallback = function(err) {
     if (err) {
       throw err;
     }
-  });
+  };
+    
+  this._server = http.createServer(this._handleRequest.bind(this));
+  if (this._listenInterface) {
+    this._server.listen(this._port, this.getLocalInterfaceAddress(), serverCallback);
+  } else {
+    this._server.listen(this._port, serverCallback);
+  }
 };
 
 Wemo.prototype._handleRequest = function(req, res) {
@@ -95,32 +101,31 @@ Wemo.prototype._handleRequest = function(req, res) {
   }
 };
 
-Wemo.prototype.getCallbackURL = function() {
-  var self = this;
-  var getLocalInterfaceAddress = function() {
-    var interfaces = os.networkInterfaces();
-    if (self._callbackInterface) {
-      if (interfaces[self._callbackInterface]) {
-        interfaces = [interfaces[self._callbackInterface]];
-      } else {
-        throw new Error('Unable to find callback interface ' + self._callbackInterface);
-      }
-    }
-    var addresses = [];
-    for (var k in interfaces) {
-      for (var k2 in interfaces[k]) {
-        var address = interfaces[k][k2];
-        if (address.family === 'IPv4' && !address.internal) {
-          addresses.push(address.address);
-        }
-      }
-    }
-    return addresses.shift();
-  };
+Wemo.prototype.getLocalInterfaceAddress = function() {
+  var interfaces = os.networkInterfaces();
+   if (this._listenInterface) {
+     if (interfaces[this._listenInterface]) {
+       interfaces = [interfaces[this._listenInterface]];
+     } else {
+       throw new Error('Unable to find interface ' + this._listenInterface);
+     }
+   }
+   var addresses = [];
+   for (var k in interfaces) {
+     for (var k2 in interfaces[k]) {
+       var address = interfaces[k][k2];
+       if (address.family === 'IPv4' && !address.internal) {
+         addresses.push(address.address);
+       }
+     }
+   }
+   return addresses.shift();
+}
 
+Wemo.prototype.getCallbackURL = function() {
   if (!this._callbackURL) {
     var port = this._server.address().port;
-    var host = getLocalInterfaceAddress();
+    var host = this.getLocalInterfaceAddress();
     this._callbackURL = 'http://' + host + ':' + port;
   }
   return this._callbackURL;
