@@ -71,7 +71,7 @@ Wemo.prototype._listen = function() {
       throw err;
     }
   };
-    
+
   this._server = http.createServer(this._handleRequest.bind(this));
   if (this._listenInterface) {
     this._server.listen(this._port, this.getLocalInterfaceAddress(), serverCallback);
@@ -103,24 +103,24 @@ Wemo.prototype._handleRequest = function(req, res) {
 
 Wemo.prototype.getLocalInterfaceAddress = function() {
   var interfaces = os.networkInterfaces();
-   if (this._listenInterface) {
-     if (interfaces[this._listenInterface]) {
-       interfaces = [interfaces[this._listenInterface]];
-     } else {
-       throw new Error('Unable to find interface ' + this._listenInterface);
-     }
-   }
-   var addresses = [];
-   for (var k in interfaces) {
-     for (var k2 in interfaces[k]) {
-       var address = interfaces[k][k2];
-       if (address.family === 'IPv4' && !address.internal) {
-         addresses.push(address.address);
-       }
-     }
-   }
-   return addresses.shift();
-}
+  if (this._listenInterface) {
+    if (interfaces[this._listenInterface]) {
+      interfaces = [interfaces[this._listenInterface]];
+    } else {
+      throw new Error('Unable to find interface ' + this._listenInterface);
+    }
+  }
+  var addresses = [];
+  for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+      var address = interfaces[k][k2];
+      if (address.family === 'IPv4' && !address.internal) {
+        addresses.push(address.address);
+      }
+    }
+  }
+  return addresses.shift();
+};
 
 Wemo.prototype.getCallbackURL = function() {
   if (!this._callbackURL) {
