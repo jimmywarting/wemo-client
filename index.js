@@ -48,6 +48,11 @@ Wemo.prototype.load = function(setupUrl, cb) {
           cb.call(self, device);
         }
       }
+    } else {
+      debug('Error occurred connecting to device at %s', location);
+      if (cb) {
+        cb.call(self, null, err);
+      }
     }
   });
 };

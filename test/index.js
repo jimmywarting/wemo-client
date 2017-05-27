@@ -38,7 +38,7 @@ describe('Wemo', function() {
     req.end();
   });
 
-  describe('#load(setupUrl, cb)', function() {
+  describe('#load(setupUrl, cb, err)', function() {
     it('must load a device', function(done) {
       var wemo = new Wemo();
       var mitm = Mitm();
@@ -55,6 +55,23 @@ describe('Wemo', function() {
         done();
       });
 
+    });
+
+    it('must error if no connection can be established', function(done) {
+      var wemo = new Wemo();
+      var mitm = Mitm();
+      mitm.on('request', function(req, res) {
+        req.url.must.be('/setup.xml');
+        res.statusCode = 404;
+        res.write('Failed to connect');
+        res.end();
+        mitm.disable();
+      });
+
+      wemo.load('http://127.0.0.2/setup.xml', function(device, err) {
+        demand(err).not.be.undefined();
+        done();
+      });
     });
   });
 
