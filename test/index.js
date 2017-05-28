@@ -50,8 +50,9 @@ describe('Wemo', function() {
         mitm.disable();
       });
 
-      wemo.load('http://127.0.0.2/setup.xml', function(device) {
-        deviceInfo.serialNumber.must.be('000000000000B');
+      wemo.load('http://127.0.0.2/setup.xml', function(err, device) {
+        demand(err).must.be.falsy();
+        device.serialNumber.must.be('000000000000B');
         done();
       });
 
@@ -68,7 +69,7 @@ describe('Wemo', function() {
         mitm.disable();
       });
 
-      wemo.load('http://127.0.0.2/setup.xml', function(device, err) {
+      wemo.load('http://127.0.0.2/setup.xml', function(err) {
         demand(err).not.be.undefined();
         done();
       });

@@ -45,13 +45,13 @@ Wemo.prototype.load = function(setupUrl, cb) {
       if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
         debug('Found device: %j', json);
         if (cb) {
-          cb.call(self, device);
+          cb.call(self, err, device);
         }
       }
     } else {
       debug('Error occurred connecting to device at %s', location);
       if (cb) {
-        cb.call(self, null, err);
+        cb.call(self, err, null);
       }
     }
   });
