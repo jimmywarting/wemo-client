@@ -97,6 +97,8 @@ The callback will only be called for newly found devices (those that have not be
 
 #### load(setupUrl, cb)
 
+*API breaking in: v0.13*
+
 Allows to skip discovery if the `setupUrl` of a Wemo is already known. A `deviceInfo` will be passed to `cb` that can be used to get a client for the device found. The `err` field will be non-null in the event of an error.
 
 * **String** *setupUrl* Must point to setup.xml of the requested device (`http://device_ip:device_port/setup.xml`).
