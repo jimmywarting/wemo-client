@@ -1,7 +1,7 @@
 var Wemo = require('../index');
 var wemo = new Wemo();
 
-function foundDevice(deviceInfo) {
+function foundDevice(err, deviceInfo) {
   console.log('Wemo Device Found: %s (%s)',
     deviceInfo.friendlyName, deviceInfo.deviceType);
 

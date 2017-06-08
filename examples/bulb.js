@@ -10,7 +10,7 @@ function dimBulb(client, device) {
   }, 3000);
 }
 
-function foundDevice(deviceInfo) {
+function foundDevice(err, deviceInfo) {
   if (deviceInfo.deviceType === Wemo.DEVICE_TYPE.Bridge) {
     console.log('Wemo Bridge found: %s', deviceInfo.friendlyName);
 
