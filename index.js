@@ -35,7 +35,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
     path: location.path,
     method: 'GET'
   }, function(err, json) {
-    if (!err && json) {
+    if (!err && json && json.root) {
       var device = json.root.device;
       device.host = location.hostname;
       device.port = location.port;
