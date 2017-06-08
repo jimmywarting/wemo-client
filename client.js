@@ -235,7 +235,7 @@ WemoClient.prototype.setAttributes = function(attributes, cb) {
   var builder = new xml2js.Builder({ rootName: 'attribute', headless: true, renderOpts: { pretty: false } });
 
   var xml_attributes = Object.keys(attributes).map(function(attribute_key) {
-    return builder.buildObject({ name: attribute_key, value: attributes[attribute_key]});
+    return builder.buildObject({ name: attribute_key, value: attributes[attribute_key] });
   }).join('');
 
   var xml = xml_attributes;
