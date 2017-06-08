@@ -238,11 +238,9 @@ WemoClient.prototype.setAttributes = function(attributes, cb) {
     return builder.buildObject({ name: attribute_key, value: attributes[attribute_key] });
   }).join('');
 
-  var xml = xml_attributes;
-
   this.soapAction('urn:Belkin:service:deviceevent:1', 'SetAttributes', {
     attributeList: {
-      '#text': xml
+      '#text': xml_attributes
     }
   }, cb);
 };
