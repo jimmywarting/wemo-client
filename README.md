@@ -262,7 +262,7 @@ The callback is passed the `binaryState`, `instantPower` and `data` (see [Event:
 
 Sets attributes on a device (Heater, Humidifier), used for setting FanMode, Mode, TimeRemaining, and SetTemperature (not exhaustive) to a value.
 
-* **OBJECT** *attributes* 
+* **Object** *attributes* 
 ```javascript
 {
   "SetTemperature": "73.0",
