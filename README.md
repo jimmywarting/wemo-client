@@ -32,7 +32,7 @@ $ npm install wemo-client
 var Wemo = require('wemo-client');
 var wemo = new Wemo();
 
-wemo.discover(function(deviceInfo) {
+wemo.discover(function(err, deviceInfo) {
   console.log('Wemo Device Found: %j', deviceInfo);
 
   // Get the client for the found device
@@ -148,7 +148,7 @@ Capability of a device connected via Wemo Bridge changed its status.
 
 #### Event: attributeList (name, value, prevalue, timestamp)
 
-Attribute of a device has changed. This seems to apply to Wemo Maker only for now.
+Attribute of a device has changed. This applies to Wemo Maker, Wemo Humidifier, and Wemo Heater (may not be exhaustive).
 
 * **String** *name* Name of the attribute, e.g. `Switch`
 * **String** *value* Current value
@@ -257,6 +257,26 @@ Get power consumption data for a Wemo Insight Switch
 * **Callback** *cb* cb(err, binaryState, instantPower, data)
 
 The callback is passed the `binaryState`, `instantPower` and `data` (see [Event: InsightParams](#event-insightparams-binarystate-instantpower-data))
+
+#### setAttributes(attributes, cb)
+
+Sets attributes on a device (Heater, Humidifier), used for setting FanMode, Mode, TimeRemaining, and SetTemperature (not exhaustive) to a value.
+
+* **OBJECT** *attributes* 
+```javascript
+{
+  "SetTemperature": "73.0",
+  "TimeRemaining": "120"
+}
+```
+
+You can set any number of attributes in this manner, and if you do not specify an attribute, it is left unchanged on the device.
+
+* **Callback** *cb* cb(err, returnValue)
+
+The callback is passed the `returnValue`, which is what the device returned for that SOAP call.
+
+
 
 ## Debugging
 
