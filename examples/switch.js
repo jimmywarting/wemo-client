@@ -1,7 +1,7 @@
 var Wemo = require('../index');
 var wemo = new Wemo();
 
-function foundDevice(device) {
+function foundDevice(err, device) {
   if (device.deviceType === Wemo.DEVICE_TYPE.Switch) {
     console.log('Wemo Switch found: %s', device.friendlyName);
 
