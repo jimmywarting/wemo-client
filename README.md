@@ -19,7 +19,8 @@ Low-level client library for controlling recent Wemo devices including Bulbs. Su
     * OSRAM Lightify Tunable White (untested)
     * OSRAM Gardenspot Mini RGB (untested)
   * Wemo Light Switch
-
+  * Wemo Dimmer
+  
 ## Install
 
 ```bash
