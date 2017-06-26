@@ -23,6 +23,7 @@ Wemo.DEVICE_TYPE = {
   Maker: 'urn:Belkin:device:Maker:1',
   Insight: 'urn:Belkin:device:insight:1',
   LightSwitch: 'urn:Belkin:device:lightswitch:1',
+  Dimmer: 'urn:Belkin:device:dimmer:1',
   Humidifier: 'urn:Belkin:device:Humidifier:1',
   HeaterB: 'urn:Belkin:device:HeaterB:1'
 };
