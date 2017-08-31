@@ -182,14 +182,12 @@ describe('WemoClient', function() {
 
     it('must send a valid body', function(done) {
       mitm.on('request', function(req, res) {
-        req.on('data', function(chunk) {
-          var data = chunk.toString();
+        req.setEncoding('utf8');
+        req.on('data', function(data) {
           data.must.contain('<u:TheAction xmlns:u="urn:Belkin:service:deviceinfo:1">');
           data.must.contain('<TheBody>Foo</TheBody>');
           done();
         });
-        res.statusCode = 200;
-        res.end();
       });
       client.soapAction('urn:Belkin:service:deviceinfo:1', 'TheAction', { TheBody: 'Foo' });
     });
@@ -198,15 +196,13 @@ describe('WemoClient', function() {
   describe('#setBinaryState(val)', function() {
     it('must send a BinaryState action', function(done) {
       mitm.on('request', function(req, res) {
-        req.on('data', function(chunk) {
-          var data = chunk.toString();
+        req.setEncoding('utf8');
+        req.url.must.equal('/upnp/control/basicevent1');
+        req.on('data', function(data) {
           data.must.contain('<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">');
           data.must.contain('<BinaryState>1</BinaryState>');
           done();
         });
-        req.url.must.equal('/upnp/control/basicevent1');
-        res.statusCode = 200;
-        res.end();
       });
       client.setBinaryState(1);
     });
@@ -267,8 +263,10 @@ describe('WemoClient', function() {
   describe('#setDeviceStatus(deviceId, capabilityId, cb)', function() {
     it('must send a DeviceStatus action', function(done) {
       mitm.on('request', function(req, res) {
-        req.on('data', function(chunk) {
-          var data = chunk.toString();
+        req.setEncoding('utf8');
+        req.url.must.equal('/upnp/control/bridge1');
+        res.statusCode = 200;
+        req.on('data', function(data) {
           data.must.contain('<u:SetDeviceStatus xmlns:u="urn:Belkin:service:bridge:1">');
           data.must.contain('<DeviceStatusList>');
           data.must.contain('&lt;IsGroupAction&gt;YES&lt;/IsGroupAction&gt;');
@@ -277,9 +275,6 @@ describe('WemoClient', function() {
           data.must.contain('&lt;CapabilityValue&gt;1&lt;/CapabilityValue&gt;');
           done();
         });
-        req.url.must.equal('/upnp/control/bridge1');
-        res.statusCode = 200;
-        res.end();
       });
       client.setDeviceStatus('1432253402', '10006', '1');
     });
@@ -288,16 +283,15 @@ describe('WemoClient', function() {
   describe('#setLightColor(deviceId, r, g, b, cb)', function() {
     it('must send a DeviceStatus action', function(done) {
       mitm.on('request', function(req, res) {
-        req.on('data', function(chunk) {
-          var data = chunk.toString();
+        req.setEncoding('utf8');
+        req.url.must.equal('/upnp/control/bridge1');
+        res.statusCode = 200;
+        req.on('data', function(data) {
           data.must.contain('&lt;DeviceID&gt;1432253402&lt;/DeviceID&gt;');
           data.must.contain('&lt;CapabilityID&gt;10300&lt;/CapabilityID&gt;');
           data.must.contain('&lt;CapabilityValue&gt;45968:17936:0&lt;/CapabilityValue&gt;');
           done();
         });
-        req.url.must.equal('/upnp/control/bridge1');
-        res.statusCode = 200;
-        res.end();
       });
       client.setLightColor('1432253402', 255, 0, 0);
     });
