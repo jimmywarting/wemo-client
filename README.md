@@ -61,7 +61,6 @@ wemo.discover(function(err, deviceInfo) {
 
 #### new Wemo([opts])
 
-Create the Wemo instance. An optional object containing options can be specified. Available options include `port` which will provide a port to bind to for listening to UPnP events (the default is to listen on any available randomly selected port.) Discovery options for `node-ssdp` can also be specified as `discover_opts`. The `listen_interface` option can be used to specify which network interface to listen on.  If `listen_interface` is not specified then by default the server will listen on all interfaces, however, Wemo subscription messages will only be sent to the first non-internal IPv4 address returned by `os.networkInterfaces()` which may or may not be what you want.
 Create the Wemo instance. An optional object containing options can be specified. Available options include `port` which will provide a port to bind to for listening to UPnP events (the default is to listen on any available randomly selected port.) Discovery options for `node-ssdp` can also be specified as `discover_opts`. The `listen_interface` option can be used to specify which network interface to listen on.  If `listen_interface` is not specified then by default the server will listen on all interfaces, however, Wemo subscription messages will only be sent to the first non-internal IPv4 address returned by `os.networkInterfaces()` after being sorted by compatible network which may or may not be what you want.
 
 Example of options:
