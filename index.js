@@ -43,7 +43,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
       var device = json.root.device;
       device.host = location.hostname;
       device.port = location.port;
-      device.callbackURL = self.getCallbackURL({clientHostname: location.hostname});
+      device.callbackURL = self.getCallbackURL({ clientHostname: location.hostname });
 
       // Return devices only once!
       if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
@@ -136,6 +136,7 @@ Wemo.prototype.getLocalInterfaceAddress = function(targetNetwork) {
 };
 
 Wemo.prototype.getCallbackURL = function(opts) {
+  opts = opts || {};
   if (!this._callbackURL) {
     var port = this._server.address().port;
     var host = this.getLocalInterfaceAddress(opts.clientHostname);
