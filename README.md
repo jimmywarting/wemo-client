@@ -87,6 +87,7 @@ Static map of supported models and device types.
 * Maker
 * Insight
 * LightSwitch
+* Dimmer
 * Humidifier
 * HeaterB
 
@@ -135,7 +136,7 @@ Binary state of a device has been updated, e.g. a motion sensor detected motion 
 
 ```javascript
 client.on('binaryState', function(value) {
-  console.log('Device turned %s', value === '1' ? 'on' : 'off')
+  console.log('Device turned %s', value === '1' ? 'on' : 'off');
 });
 ```
 
@@ -170,9 +171,9 @@ Get bulbs connected to a Wemo Bridge. An `endDeviceInfo` for every device paired
 ```javascript
 [{
   friendlyName: 'Color Bulb',
-  deviceId: 'EA103EA2B2782FFF'
+  deviceId: 'EA103EA2B2782FFF',
   capabilities: {
-    '10006': '1'
+    '10006': '1',
     '10008': '121:0'
   },
   deviceType: 'dimmableLight'
@@ -198,6 +199,21 @@ The callback is passed the `state` (`1` = on, `0` = off).
 Turn the device on or off. Will also cause a `binaryState` event to be triggered.
 
 * **String** *value* `1` = on, `0` = off
+* **Callback** *cb* cb(err, response)
+
+#### getBrightness(cb)
+
+Get the device's brightness level (0 - 100).
+
+* **Callback** *cb* cb(err, brightness)
+
+The callback is passed the brightness level (0 - 100).
+
+#### setBrightness(value, [cb])
+
+Set the device brightness level. Will also cause a `binaryState` event to be triggered.
+
+* **Integer** *value* 1 - 100
 * **Callback** *cb* cb(err, response)
 
 #### getAttributes(cb)
