@@ -377,6 +377,9 @@ WemoClient.prototype.handleCallback = function(body) {
     BinaryState: function(data) {
       self.emit('binaryState', data.substring(0, 1));
     },
+    Brightness: function(data) {
+      self.emit('brightness', parseInt(data));
+    },
     StatusChange: function(data) {
       xml2js.parseString(data, { explicitArray: false }, function(err, xml) {
         if (!err) {

@@ -104,6 +104,17 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('Event: brightness', function() {
+    it('must emit brightness events', function(done) {
+      client.on('brightness', function(brightness) {
+        brightness.must.be(13);
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/brightnessEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
   describe('Event: statusChange', function() {
     it('must emit statusChange events', function(done) {
       client.on('statusChange', function(deviceId, capabilityId, value) {
