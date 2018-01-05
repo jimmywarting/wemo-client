@@ -2,6 +2,7 @@
   <s:Body>
     <u:GetBinaryStateResponse xmlns:u="urn:Belkin:service:basicevent:1">
       <BinaryState>1</BinaryState>
+      <brightness>42</brightness>
     </u:GetBinaryStateResponse>
   </s:Body>
 </s:Envelope>

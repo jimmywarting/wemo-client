@@ -104,6 +104,17 @@ describe('WemoClient', function() {
     });
   });
 
+  describe('Event: brightness', function() {
+    it('must emit brightness events', function(done) {
+      client.on('brightness', function(brightness) {
+        brightness.must.be(13);
+        done();
+      });
+      var fixture = fs.readFileSync(__dirname + '/fixtures/brightnessEvent.xml');
+      client.handleCallback(fixture);
+    });
+  });
+
   describe('Event: statusChange', function() {
     it('must emit statusChange events', function(done) {
       client.on('statusChange', function(deviceId, capabilityId, value) {
@@ -218,6 +229,51 @@ describe('WemoClient', function() {
       client.getBinaryState(function(err, binaryState) {
         demand(err).to.be.falsy();
         binaryState.must.be('1');
+        done();
+      });
+    });
+  });
+
+  describe('#setBrightness(val)', function() {
+    it('must send a BinaryState action', function(done) {
+      mitm.on('request', function(req) {
+        req.setEncoding('utf8');
+        req.url.must.equal('/upnp/control/basicevent1');
+        req.on('data', function(data) {
+          data.must.contain('<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">');
+          data.must.contain('<BinaryState>1</BinaryState>');
+          data.must.contain('<brightness>50</brightness>');
+          done();
+        });
+      });
+      client.setBrightness(50);
+    });
+
+    it('sets BinaryState to 0 if brightness is 0', function(done) {
+      mitm.on('request', function(req) {
+        req.setEncoding('utf8');
+        req.url.must.equal('/upnp/control/basicevent1');
+        req.on('data', function(data) {
+          data.must.contain('<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">');
+          data.must.contain('<BinaryState>0</BinaryState>');
+          data.must.contain('<brightness>0</brightness>');
+          done();
+        });
+      });
+      client.setBrightness(0);
+    });
+  });
+
+  describe('#getBrightness(cb)', function() {
+    it('must callback with a brightness value', function(done) {
+      mitm.on('request', function(req, res) {
+        var fixture = fs.readFileSync(__dirname + '/fixtures/getBinaryState.xml');
+        res.write(fixture);
+        res.end();
+      });
+      client.getBrightness(function(err, brightness) {
+        demand(err).to.be.falsy();
+        brightness.must.be(42);
         done();
       });
     });

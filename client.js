@@ -85,6 +85,8 @@ WemoClient.request = function(options, data, cb) {
 };
 
 WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
+  this._verifyServiceSupport(serviceType);
+
   cb = cb || function() {};
 
   var xml = xmlbuilder.create('s:Envelope', {
@@ -231,6 +233,20 @@ WemoClient.prototype.getBinaryState = function(cb) {
   });
 };
 
+WemoClient.prototype.setBrightness = function(brightness, cb) {
+  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+    BinaryState: brightness <= 0 ? 0 : 1,
+    brightness: brightness
+  }, cb);
+};
+
+WemoClient.prototype.getBrightness = function(cb) {
+  this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, function(err, data) {
+    if (err) return cb(err);
+    cb(null, parseInt(data.brightness));
+  });
+};
+
 WemoClient.prototype.setAttributes = function(attributes, cb) {
   var builder = new xml2js.Builder({ rootName: 'attribute', headless: true, renderOpts: { pretty: false } });
 
@@ -293,9 +309,8 @@ WemoClient.prototype._onListenerAdded = function(eventName) {
 };
 
 WemoClient.prototype._subscribe = function(serviceType) {
-  if (!this.services[serviceType]) {
-    throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
-  }
+  this._verifyServiceSupport(serviceType);
+
   if (!this.callbackURL) {
     throw new Error('Can not subscribe without callbackURL');
   }
@@ -349,11 +364,21 @@ WemoClient.prototype._subscribe = function(serviceType) {
   req.end();
 };
 
+WemoClient.prototype._verifyServiceSupport = function(serviceType) {
+  if (!this.services[serviceType]) {
+    throw new Error('Service ' + serviceType + ' not supported by ' + this.UDN);
+  }
+};
+
+
 WemoClient.prototype.handleCallback = function(body) {
   var self = this;
   var handler = {
     BinaryState: function(data) {
       self.emit('binaryState', data.substring(0, 1));
+    },
+    Brightness: function(data) {
+      self.emit('brightness', parseInt(data));
     },
     StatusChange: function(data) {
       xml2js.parseString(data, { explicitArray: false }, function(err, xml) {
