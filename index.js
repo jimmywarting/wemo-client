@@ -2,6 +2,7 @@ var SSDPClient = require('node-ssdp').Client;
 var url = require('url');
 var http = require('http');
 var os = require('os');
+var ip = require('ip');
 var debug = require('debug')('wemo-client');
 
 var WemoClient = require('./client');
@@ -42,7 +43,7 @@ Wemo.prototype.load = function(setupUrl, cb) {
       var device = json.root.device;
       device.host = location.hostname;
       device.port = location.port;
-      device.callbackURL = self.getCallbackURL();
+      device.callbackURL = self.getCallbackURL({ clientHostname: location.hostname });
 
       // Return devices only once!
       if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
@@ -109,7 +110,7 @@ Wemo.prototype._handleRequest = function(req, res) {
   }
 };
 
-Wemo.prototype.getLocalInterfaceAddress = function() {
+Wemo.prototype.getLocalInterfaceAddress = function(targetNetwork) {
   var interfaces = os.networkInterfaces();
   if (this._listenInterface) {
     if (interfaces[this._listenInterface]) {
@@ -123,17 +124,22 @@ Wemo.prototype.getLocalInterfaceAddress = function() {
     for (var k2 in interfaces[k]) {
       var address = interfaces[k][k2];
       if (address.family === 'IPv4' && !address.internal) {
-        addresses.push(address.address);
+        if (targetNetwork && ip.subnet(address.address, address.netmask).contains(targetNetwork)) {
+          addresses.unshift(address.address);
+        } else {
+          addresses.push(address.address);
+        }
       }
     }
   }
   return addresses.shift();
 };
 
-Wemo.prototype.getCallbackURL = function() {
+Wemo.prototype.getCallbackURL = function(opts) {
+  opts = opts || {};
   if (!this._callbackURL) {
     var port = this._server.address().port;
-    var host = this.getLocalInterfaceAddress();
+    var host = this.getLocalInterfaceAddress(opts.clientHostname);
     this._callbackURL = 'http://' + host + ':' + port;
   }
   return this._callbackURL;
