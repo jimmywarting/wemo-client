@@ -234,10 +234,16 @@ WemoClient.prototype.getBinaryState = function(cb) {
 };
 
 WemoClient.prototype.setBrightness = function(brightness, cb) {
-  this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
-    BinaryState: brightness <= 0 ? 0 : 1,
-    brightness: brightness
-  }, cb);
+  if (brightness <= 0) {
+    this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+      BinaryState: 0,
+      brightness: brightness
+    }, cb);
+  } else {
+    this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+      brightness: brightness
+    }, cb);
+  }
 };
 
 WemoClient.prototype.getBrightness = function(cb) {

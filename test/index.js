@@ -241,7 +241,6 @@ describe('WemoClient', function() {
         req.url.must.equal('/upnp/control/basicevent1');
         req.on('data', function(data) {
           data.must.contain('<u:SetBinaryState xmlns:u="urn:Belkin:service:basicevent:1">');
-          data.must.contain('<BinaryState>1</BinaryState>');
           data.must.contain('<brightness>50</brightness>');
           done();
         });
