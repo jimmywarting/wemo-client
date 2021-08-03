@@ -145,11 +145,11 @@ Wemo.prototype.getCallbackURL = function(opts) {
   return this._callbackURL;
 };
 
-Wemo.prototype.client = function(device) {
+Wemo.prototype.client = function(device, options) {
   if (this._clients[device.UDN] && !this._clients[device.UDN].error) {
     return this._clients[device.UDN];
   }
 
-  var client = this._clients[device.UDN] = new WemoClient(device);
+  var client = this._clients[device.UDN] = new WemoClient(device, options);
   return client;
 };
