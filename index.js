@@ -44,6 +44,11 @@ Wemo.prototype.load = function(setupUrl, cb) {
       device.host = location.hostname;
       device.port = location.port;
       device.callbackURL = self.getCallbackURL({ clientHostname: location.hostname });
+      // XXX: WemoClient.request parses XML with { explicitArray: false };
+      // disregard that, we actually want an array here.
+      if (!Array.isArray(device.serviceList.service)) {
+        device.serviceList.service = [device.serviceList.service];
+      }
 
       // Return devices only once!
       if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
