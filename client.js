@@ -16,7 +16,7 @@ function mapCapabilities(capabilityIds, capabilityValues) {
   return result;
 }
 
-var WemoClient = module.exports = function(config) {
+var WemoClient = module.exports = function(config, options) {
   EventEmitter.call(this);
   this.host = config.host;
   this.port = config.port;
@@ -26,6 +26,9 @@ var WemoClient = module.exports = function(config) {
   this.callbackURL = config.callbackURL;
   this.device = config;
   this.error = undefined;
+  if (options) {
+    this.defineRequestBodyLength = options.defineRequestBodyLength;
+  }
 
   // Create map of services
   config.serviceList.service.forEach(function(service) {
@@ -112,6 +115,10 @@ WemoClient.prototype.soapAction = function(serviceType, action, body, cb) {
       'Content-Type': 'text/xml; charset="utf-8"'
     }
   };
+
+  if (this.defineRequestBodyLength) {
+    options.headers['CONTENT-LENGTH'] = payload.length;
+  }
 
   WemoClient.request(options, payload, function(err, response) {
     if (err) {
