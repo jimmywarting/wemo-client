@@ -1,12 +1,17 @@
 const http = require('http')
 const EventEmitter = require('events')
+const {promisify} = require('util')
 
 const xml2js = require('xml2js')
 const entities = require('entities')
 const debugFactory = require('debug')
 const xmlbuilder = require('xmlbuilder')
+const universalify = require('./frompromise.js')
 
 const debug = debugFactory('wemo-client')
+
+/** @type {(str, opts) => Promise} */
+const parseXml = promisify(xml2js.parseString)
 
 function mapCapabilities (capabilityIds, capabilityValues) {
   const ids = capabilityIds.split(',')
@@ -46,10 +51,8 @@ class WemoClient extends EventEmitter {
     this.on('newListener', this._onListenerAdded)
   }
 
-  soapAction (serviceType, action, body, cb) {
+  async soapAction (serviceType, action, body) {
     this._verifyServiceSupport(serviceType)
-
-    cb = cb || function () { }
 
     const xml = xmlbuilder.create('s:Envelope', {
       version: '1.0',
@@ -75,18 +78,16 @@ class WemoClient extends EventEmitter {
       }
     }
 
-    WemoClient.request(options, payload, (err, response) => {
-      if (err) {
-        this.error = err.code
-        this.emit('error', err)
-        return cb(err)
-      }
-      debug('%s Response: ', action, response)
-      cb(null, response && response['s:Envelope']['s:Body'][`u:${action}Response`])
+    const response = await WemoClient.request(options, payload).catch(err => {
+      this.error = err.code
+      this.emit('error', err)
+      throw err
     })
+
+    return response && response['s:Envelope']['s:Body'][`u:${action}Response`]
   }
 
-  getEndDevices (cb) {
+  async getEndDevices () {
     const parseDeviceInfo = function (data) {
       const device = {}
 
@@ -119,31 +120,30 @@ class WemoClient extends EventEmitter {
       return device
     }
 
-    const parseResponse = (err, data) => {
-      if (err) { return cb(err) }
-      debug('endDevices raw data', data)
-      const endDevices = []
-      xml2js.parseString(data.DeviceLists, function (err, result) {
-        if (err) { return cb(err) }
-        const deviceInfos = result.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo
-        if (deviceInfos) {
-          endDevices.push(...deviceInfos.map(parseDeviceInfo))
-        }
-        if (result.DeviceLists.DeviceList[0].GroupInfos) {
-          const groupInfos = result.DeviceLists.DeviceList[0].GroupInfos[0].GroupInfo
-          endDevices.push(...groupInfos.map(parseDeviceInfo))
-        }
-        cb(null, endDevices)
-      })
-    }
-
-    this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', {
+    const data = await this.soapAction('urn:Belkin:service:bridge:1', 'GetEndDevices', {
       DevUDN: this.UDN,
       ReqListType: 'PAIRED_LIST'
-    }, parseResponse)
+    })
+
+    debug('endDevices raw data', data)
+    const endDevices = []
+
+    const result = await parseXml(data.DeviceLists)
+    const deviceInfos = result.DeviceLists.DeviceList[0].DeviceInfos[0].DeviceInfo
+
+    if (deviceInfos) {
+      endDevices.push(...deviceInfos.map(parseDeviceInfo))
+    }
+
+    if (result.DeviceLists.DeviceList[0].GroupInfos) {
+      const groupInfos = result.DeviceLists.DeviceList[0].GroupInfos[0].GroupInfo
+      endDevices.push(...groupInfos.map(parseDeviceInfo))
+    }
+
+    return endDevices
   }
 
-  setDeviceStatus (deviceId, capability, value, cb) {
+  async setDeviceStatus (deviceId, capability, value) {
     const deviceStatusList = xmlbuilder.create('DeviceStatus', {
       version: '1.0',
       encoding: 'utf-8'
@@ -154,98 +154,83 @@ class WemoClient extends EventEmitter {
       CapabilityValue: value
     }).end()
 
-    this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', {
-      DeviceStatusList: {
-        '#text': deviceStatusList
-      }
-    }, cb)
+    return this.soapAction('urn:Belkin:service:bridge:1', 'SetDeviceStatus', {
+      DeviceStatusList: { '#text': deviceStatusList }
+    })
   }
 
-  getDeviceStatus (deviceId, cb) {
-    const parseResponse = (err, data) => {
-      if (err) { return cb(err) }
-      xml2js.parseString(data.DeviceStatusList, { explicitArray: false }, (err, result) => {
-        if (err) { return cb(err) }
-        const deviceStatus = result.DeviceStatusList.DeviceStatus
-        const capabilities = mapCapabilities(deviceStatus.CapabilityID, deviceStatus.CapabilityValue)
-        cb(null, capabilities)
-      })
-    }
-
-    this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', {
+  async getDeviceStatus (deviceId) {
+    const data = await this.soapAction('urn:Belkin:service:bridge:1', 'GetDeviceStatus', {
       DeviceIDs: deviceId
-    }, parseResponse)
+    })
+    const result = await parseXml(data.DeviceStatusList, { explicitArray: false })
+    const deviceStatus = result.DeviceStatusList.DeviceStatus
+    const capabilities = mapCapabilities(deviceStatus.CapabilityID, deviceStatus.CapabilityValue)
+    return capabilities
   }
 
-  setLightColor (deviceId, red, green, blue, cb) {
+  async setLightColor (deviceId, red, green, blue) {
     const color = WemoClient.rgb2xy(red, green, blue)
-    this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0', cb)
+    return this.setDeviceStatus(deviceId, 10300, color.join(':') + ':0')
   }
 
-  setBinaryState (value, cb) {
-    this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+  async setBinaryState (value) {
+    return this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
       BinaryState: value
-    }, cb)
-  }
-
-  getBinaryState (cb) {
-    this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, (err, data) => {
-      if (err) { return cb(err) }
-      cb(null, data.BinaryState)
     })
   }
 
-  setBrightness (brightness, cb) {
-    this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
+  async getBinaryState () {
+    const {BinaryState} = await this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null)
+    return BinaryState
+  }
+
+  async setBrightness (brightness) {
+    return this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
       BinaryState: brightness <= 0 ? 0 : 1,
-      brightness: brightness
-    }, cb)
-  }
-
-  getBrightness (cb) {
-    this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null, (err, data) => {
-      if (err) { return cb(err) }
-      cb(null, parseInt(data.brightness))
+      brightness
     })
   }
 
-  setAttributes (attributes, cb) {
+  async getBrightness () {
+    const { brightness } = await this.soapAction('urn:Belkin:service:basicevent:1', 'GetBinaryState', null)
+    return parseInt(brightness)
+  }
+
+  async setAttributes (attributes) {
     const builder = new xml2js.Builder({ rootName: 'attribute', headless: true, renderOpts: { pretty: false } })
 
     const xml_attributes = Object.keys(attributes).map((attribute_key) => {
       return builder.buildObject({ name: attribute_key, value: attributes[attribute_key] })
     }).join('')
 
-    this.soapAction('urn:Belkin:service:deviceevent:1', 'SetAttributes', {
+    return this.soapAction('urn:Belkin:service:deviceevent:1', 'SetAttributes', {
       attributeList: {
         '#text': xml_attributes
       }
-    }, cb)
-  }
-
-  getAttributes (cb) {
-    this.soapAction('urn:Belkin:service:deviceevent:1', 'GetAttributes', null, (err, data) => {
-      if (err) { return cb(err) }
-      const xml = '<attributeList>' + entities.decodeXML(data.attributeList) + '</attributeList>'
-      xml2js.parseString(xml, { explicitArray: false }, (err, result) => {
-        if (err) { return cb(err) }
-        const attributes = {}
-        for (const key in result.attributeList.attribute) {
-          const attribute = result.attributeList.attribute[key]
-          attributes[attribute.name] = attribute.value
-        }
-        cb(null, attributes)
-      })
     })
   }
 
-  getInsightParams (cb) {
-    this.soapAction('urn:Belkin:service:insight:1', 'GetInsightParams', null, (err, data) => {
-      if (err) { return cb(err) }
+  async getAttributes () {
+    const data = await this.soapAction('urn:Belkin:service:deviceevent:1', 'GetAttributes', null)
+    const xml = '<attributeList>' + entities.decodeXML(data.attributeList) + '</attributeList>'
+    const result = await parseXml(xml, { explicitArray: false })
+    const attributes = {}
+    for (const key in result.attributeList.attribute) {
+      const attribute = result.attributeList.attribute[key]
+      attributes[attribute.name] = attribute.value
+    }
+    return attributes
+  }
 
-      const params = this._parseInsightParams(data.InsightParams)
-      cb(null, params.binaryState, params.instantPower, params.insightParams)
+  async getInsightParams (cb) {
+    const data = await this.soapAction('urn:Belkin:service:insight:1', 'GetInsightParams', null).catch(err => {
+      cb(err)
+      throw err
     })
+    const params = this._parseInsightParams(data.InsightParams)
+    cb(null, params.binaryState, params.instantPower, params.insightParams)
+    return params
   }
 
   _parseInsightParams (paramsStr) {
@@ -386,37 +371,23 @@ class WemoClient extends EventEmitter {
     })
   }
 
-  static request (options, data, cb) {
-    if (!cb && typeof data === 'function') {
-      cb = data
-      data = null
-    }
-    const req = http.request(options, res => {
-      let body = ''
-      res.setEncoding('utf8')
-      res.on('data', function (chunk) {
-        body += chunk
+  static async request (options, data) {
+    const body = await new Promise((rs, rj) => {
+      const req = http.request(options, res => {
+        let body = ''
+        res.setEncoding('utf8')
+        res.on('error', rj)
+        res.on('data', chunk => { body += chunk })
+        res.on('end', () => res.statusCode === 200
+          ? rs(body)
+          : rj(new Error('HTTP ' + res.statusCode + ': ' + body))
+        )
       })
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          xml2js.parseString(body, { explicitArray: false }, cb)
-        } else {
-          cb(new Error('HTTP ' + res.statusCode + ': ' + body))
-        }
-      })
-      res.on('error', err => {
-        debug('Error on http.request.res:', err)
-        cb(err)
-      })
+      req.on('error', rj)
+      if (data) req.write(data)
+      req.end()
     })
-    req.on('error', err => {
-      debug('Error on http.request.req:', err)
-      cb(err)
-    })
-    if (data) {
-      req.write(data)
-    }
-    req.end()
+    return parseXml(body, { explicitArray: false })
   }
 
   static rgb2xy (r, g, b) {
@@ -441,5 +412,23 @@ WemoClient.EventServices = {
   attributeList: 'urn:Belkin:service:basicevent:1',
   binaryState: 'urn:Belkin:service:basicevent:1'
 }
+
+
+for (let x of ['request'])
+  WemoClient[x] = universalify(WemoClient[x])
+
+for (let x of [
+  'getAttributes',
+  'getBinaryState',
+  'getBrightness',
+  'getDeviceStatus',
+  'getEndDevices',
+  'setAttributes',
+  'setBinaryState',
+  'setDeviceStatus',
+  'setLightColor',
+  'soapAction'
+])
+  WemoClient.prototype[x] = universalify(WemoClient.prototype[x])
 
 module.exports = WemoClient
