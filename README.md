@@ -65,7 +65,7 @@ Create the Wemo instance. An optional object containing options can be specified
 
 Example of options:
 
-```
+```js
 {
   port: 1234,
   discover_opts: {
@@ -134,7 +134,7 @@ Binary state of a device has been updated, e.g. a motion sensor detected motion 
 
 * **String** *value* The state of the binary switch/sensor. `1` = on/closed/motion, `0` = off/open/quiet
 
-```javascript
+```js
 client.on('binaryState', value => {
   console.log('Device turned %s', value === '1' ? 'on' : 'off')
 })
@@ -168,7 +168,7 @@ Wemo Insight Switch sent new power consumption data.
 #### getEndDevices(cb)
 
 Get bulbs connected to a Wemo Bridge. An `endDeviceInfo` for every device paired is passed to the callback in an array, e.g.:
-```javascript
+```js
 [{
   friendlyName: 'Color Bulb',
   deviceId: 'EA103EA2B2782FFF',
@@ -230,7 +230,7 @@ Gets the device Status of a device connected via Wemo Bridge, e.g. a bulb.
 * **Callback** *cb* cb(err, deviceStatus)
 
 The callback is passed the `deviceStatus` which is a map of device capabilities and values, e.g.:
-```javascript
+```js
 {
   '10006': '1', // on = 1, off = 0, offline = empty
   '10008': '121:0', // brightness 0-255
@@ -280,7 +280,7 @@ The callback is passed the `binaryState`, `instantPower` and `data` (see [Event:
 Sets attributes on a device (Heater, Humidifier), used for setting FanMode, Mode, TimeRemaining, and SetTemperature (not exhaustive) to a value.
 
 * **Object** *attributes*
-```javascript
+```js
 {
   "SetTemperature": "73.0",
   "TimeRemaining": "120"
