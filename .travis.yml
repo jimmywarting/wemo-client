@@ -1,8 +1,0 @@
-env:
-  - npm_config_coverage=true
-language: node_js
-node_js:
-  - "6"
-  - "8"
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
