@@ -30,7 +30,7 @@ $ npm install wemo-client
 
 ## Usage
 
-```javascript
+```js
 import Wemo from 'wemo-client'
 const wemo = new Wemo()
 
@@ -155,7 +155,7 @@ or a plug is switched on.
 
 * **String** *value* The state of the binary switch/sensor. `1` = on/closed/motion, `0` = off/open/quiet
 
-```javascript
+```js
 client.on('binaryState', value => {
   console.log('Device turned %s', value === '1' ? 'on' : 'off')
 })
