@@ -7,13 +7,15 @@ const ip = require('ip')
 const debugFactory = require('debug')
 
 const WemoClient = require('./client.js')
+const universalify = require('./frompromise.js')
 
 const debug = debugFactory('wemo-client')
 
 class Wemo {
   #port = 0
   #listenInterface
-  #clients = {}
+  /** @type {Map<string, WemoClient>} */
+  #clients = new Map()
   #ssdpClient
   #server
 
@@ -25,41 +27,34 @@ class Wemo {
     this.#ssdpClient = new SSDPClient(opts.discover_opts || {})
   }
 
-  load (setupUrl, cb) {
+  async load (setupUrl) {
     const location = url.parse(setupUrl)
 
-    WemoClient.request({
+    const json = await WemoClient.request({
+      method: 'GET',
       host: location.hostname,
       port: location.port,
       path: location.path,
-      method: 'GET'
-    }, (err, json) => {
-      if (!err && json) {
-        const device = json.root.device
-        device.host = location.hostname
-        device.port = location.port
-        device.callbackURL = this.getCallbackURL({ clientHostname: location.hostname })
-
-        // Return devices only once!
-        if (!this.#clients[device.UDN] || this.#clients[device.UDN].error) {
-          debug('Found device: %j', json)
-          if (cb) {
-            cb.call(this, err, device)
-          }
-        }
-      } else {
-        debug('Error occurred connecting to device at %s', location)
-        if (cb) {
-          cb.call(this, err, null)
-        }
-      }
     })
+
+    const device = json.root.device
+    device.host = location.hostname
+    device.port = location.port
+    device.callbackURL = this.getCallbackURL({
+      clientHostname: location.hostname
+    })
+
+    // Return devices only once!
+    if (!this.#clients.has(device.UDN) || this.#clients.get(device.UDN).error) {
+      debug('Found device: %j', json)
+      return device
+    }
   }
 
   discover (cb) {
     const handleResponse = (msg, statusCode, rinfo) => {
       if (msg.ST && msg.ST === 'urn:Belkin:service:basicevent:1') {
-        this.load(msg.LOCATION, cb)
+        this.load(msg.LOCATION).then(cb)
       }
     }
 
@@ -77,24 +72,22 @@ class Wemo {
 
     this.#server = http.createServer(this._handleRequest.bind(this))
 
-    if (this.#listenInterface) {
-      this.#server.listen(this.#port, this.getLocalInterfaceAddress(), serverCallback)
-    } else {
-      this.#server.listen(this.#port, serverCallback)
-    }
+    this.#listenInterface
+      ? this.#server.listen(this.#port, this.getLocalInterfaceAddress(), serverCallback)
+      : this.#server.listen(this.#port, serverCallback)
   }
 
   _handleRequest (req, res) {
     let body = ''
     const udn = req.url.substring(1)
 
-    if ((req.method == 'NOTIFY') && this.#clients[udn]) {
+    if (req.method == 'NOTIFY' && this.#clients.get(udn)) {
       req.on('data', chunk => {
         body += chunk.toString()
       })
       req.on('end', () => {
         debug('Incoming Request for %s: %s', udn, body)
-        this.#clients[udn].handleCallback(body)
+        this.#clients.get(udn).handleCallback(body)
         res.writeHead(204)
         res.end()
       })
@@ -141,10 +134,11 @@ class Wemo {
 
   client (device) {
     if (this.#clients[device.UDN] && !this.#clients[device.UDN].error) {
-      return this.#clients[device.UDN]
+      return this.#clients.get(device.UDN)
     }
 
-    const client = this.#clients[device.UDN] = new WemoClient(device)
+    const client = new WemoClient(device)
+    this.#clients.set(device.UDN, client)
     return client
   }
 }
@@ -160,5 +154,7 @@ Wemo.DEVICE_TYPE = {
   Humidifier: 'urn:Belkin:device:Humidifier:1',
   HeaterB: 'urn:Belkin:device:HeaterB:1'
 }
+
+Wemo.prototype.load = universalify(Wemo.prototype.load)
 
 module.exports = Wemo
