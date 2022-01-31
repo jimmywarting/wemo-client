@@ -1,21 +1,147 @@
-var SSDPClient = require('node-ssdp').Client;
-var url = require('url');
-var http = require('http');
-var os = require('os');
-var ip = require('ip');
-var debug = require('debug')('wemo-client');
+const url = require('url')
+const http = require('http')
+const os = require('os')
 
-var WemoClient = require('./client');
+const { Client: SSDPClient } = require('node-ssdp')
+const ip = require('ip')
+const debugFactory = require('debug')
 
-var Wemo = module.exports = function(opts) {
-  opts = opts || {};
-  this._port = opts.port || 0;
-  this._listenInterface = opts.listen_interface;
+const WemoClient = require('./client.js')
+const universalify = require('./frompromise.js')
 
-  this._clients = {};
-  this._listen();
-  this._ssdpClient = new SSDPClient(opts.discover_opts || {});
-};
+const debug = debugFactory('wemo-client')
+
+class Wemo {
+  #port = 0
+  #listenInterface
+  /** @type {Map<string, WemoClient>} */
+  #clients = new Map()
+  #ssdpClient
+  #server
+
+  constructor (opts = {}) {
+    this.#port = opts.port || 0
+    this.#listenInterface = opts.listen_interface
+
+    this._listen()
+    this.#ssdpClient = new SSDPClient(opts.discover_opts || {})
+  }
+
+  async load (setupUrl) {
+    const location = url.parse(setupUrl)
+
+    const json = await WemoClient.request({
+      method: 'GET',
+      host: location.hostname,
+      port: location.port,
+      path: location.path,
+    })
+
+    const device = json.root.device
+    device.host = location.hostname
+    device.port = location.port
+    device.callbackURL = this.getCallbackURL({
+      clientHostname: location.hostname
+    })
+
+    // Return devices only once!
+    if (!this.#clients.has(device.UDN) || this.#clients.get(device.UDN).error) {
+      debug('Found device: %j', json)
+      return device
+    }
+  }
+
+  discover (cb) {
+    const handleResponse = (msg, statusCode, rinfo) => {
+      if (msg.ST && msg.ST === 'urn:Belkin:service:basicevent:1') {
+        this.load(msg.LOCATION).then(cb)
+      }
+    }
+
+    this.#ssdpClient.removeAllListeners('response')
+    this.#ssdpClient.on('response', handleResponse)
+    this.#ssdpClient.search('urn:Belkin:service:basicevent:1')
+  }
+
+  _listen () {
+    const serverCallback = err => {
+      if (err) {
+        throw err
+      }
+    }
+
+    this.#server = http.createServer(this._handleRequest.bind(this))
+
+    this.#listenInterface
+      ? this.#server.listen(this.#port, this.getLocalInterfaceAddress(), serverCallback)
+      : this.#server.listen(this.#port, serverCallback)
+  }
+
+  _handleRequest (req, res) {
+    let body = ''
+    const udn = req.url.substring(1)
+
+    if (req.method == 'NOTIFY' && this.#clients.get(udn)) {
+      req.on('data', chunk => {
+        body += chunk.toString()
+      })
+      req.on('end', () => {
+        debug('Incoming Request for %s: %s', udn, body)
+        this.#clients.get(udn).handleCallback(body)
+        res.writeHead(204)
+        res.end()
+      })
+    } else {
+      debug('Received request for unknown device: %s', udn)
+      res.writeHead(404)
+      res.end()
+    }
+  }
+
+  getLocalInterfaceAddress (targetNetwork) {
+    let interfaces = os.networkInterfaces()
+    if (this.#listenInterface) {
+      if (interfaces[this.#listenInterface]) {
+        interfaces = [interfaces[this.#listenInterface]]
+      } else {
+        throw new Error('Unable to find interface ' + this.#listenInterface)
+      }
+    }
+    const addresses = []
+    for (const k in interfaces) {
+      for (const k2 in interfaces[k]) {
+        const address = interfaces[k][k2]
+        if (address.family === 'IPv4' && !address.internal) {
+          if (targetNetwork && ip.subnet(address.address, address.netmask).contains(targetNetwork)) {
+            addresses.unshift(address.address)
+          } else {
+            addresses.push(address.address)
+          }
+        }
+      }
+    }
+    return addresses.shift()
+  }
+
+  getCallbackURL (opts = {}) {
+    if (!this._callbackURL) {
+      const port = this.#server.address().port
+      const host = this.getLocalInterfaceAddress(opts.clientHostname)
+      this._callbackURL = `http://${host}:${port}`
+    }
+    return this._callbackURL
+  }
+
+  client (device) {
+    if (this.#clients[device.UDN] && !this.#clients[device.UDN].error) {
+      return this.#clients.get(device.UDN)
+    }
+
+    const client = new WemoClient(device)
+    this.#clients.set(device.UDN, client)
+    return client
+  }
+}
 
 Wemo.DEVICE_TYPE = {
   Bridge: 'urn:Belkin:device:bridge:1',
@@ -27,129 +153,8 @@ Wemo.DEVICE_TYPE = {
   Dimmer: 'urn:Belkin:device:dimmer:1',
   Humidifier: 'urn:Belkin:device:Humidifier:1',
   HeaterB: 'urn:Belkin:device:HeaterB:1'
-};
+}
 
-Wemo.prototype.load = function(setupUrl, cb) {
-  var self = this;
-  var location = url.parse(setupUrl);
+Wemo.prototype.load = universalify(Wemo.prototype.load)
 
-  WemoClient.request({
-    host: location.hostname,
-    port: location.port,
-    path: location.path,
-    method: 'GET'
-  }, function(err, json) {
-    if (!err && json) {
-      var device = json.root.device;
-      device.host = location.hostname;
-      device.port = location.port;
-      device.callbackURL = self.getCallbackURL({ clientHostname: location.hostname });
-
-      // Return devices only once!
-      if (!self._clients[device.UDN] || self._clients[device.UDN].error) {
-        debug('Found device: %j', json);
-        if (cb) {
-          cb.call(self, err, device);
-        }
-      }
-    } else {
-      debug('Error occurred connecting to device at %s', location);
-      if (cb) {
-        cb.call(self, err, null);
-      }
-    }
-  });
-};
-
-Wemo.prototype.discover = function(cb) {
-  var self = this;
-  var handleResponse = function(msg, statusCode, rinfo) {
-    if (msg.ST && msg.ST === 'urn:Belkin:service:basicevent:1') {
-      self.load(msg.LOCATION, cb);
-    }
-  };
-
-  this._ssdpClient.removeAllListeners('response');
-  this._ssdpClient.on('response', handleResponse);
-  this._ssdpClient.search('urn:Belkin:service:basicevent:1');
-};
-
-Wemo.prototype._listen = function() {
-  var serverCallback = function(err) {
-    if (err) {
-      throw err;
-    }
-  };
-
-  this._server = http.createServer(this._handleRequest.bind(this));
-  if (this._listenInterface) {
-    this._server.listen(this._port, this.getLocalInterfaceAddress(), serverCallback);
-  } else {
-    this._server.listen(this._port, serverCallback);
-  }
-};
-
-Wemo.prototype._handleRequest = function(req, res) {
-  var body = '';
-  var udn = req.url.substring(1);
-
-  if ((req.method == 'NOTIFY') && this._clients[udn]) {
-    req.on('data', function(chunk) {
-      body += chunk.toString();
-    });
-    req.on('end', function() {
-      debug('Incoming Request for %s: %s', udn, body);
-      this._clients[udn].handleCallback(body);
-      res.writeHead(204);
-      res.end();
-    }.bind(this));
-  } else {
-    debug('Received request for unknown device: %s', udn);
-    res.writeHead(404);
-    res.end();
-  }
-};
-
-Wemo.prototype.getLocalInterfaceAddress = function(targetNetwork) {
-  var interfaces = os.networkInterfaces();
-  if (this._listenInterface) {
-    if (interfaces[this._listenInterface]) {
-      interfaces = [interfaces[this._listenInterface]];
-    } else {
-      throw new Error('Unable to find interface ' + this._listenInterface);
-    }
-  }
-  var addresses = [];
-  for (var k in interfaces) {
-    for (var k2 in interfaces[k]) {
-      var address = interfaces[k][k2];
-      if (address.family === 'IPv4' && !address.internal) {
-        if (targetNetwork && ip.subnet(address.address, address.netmask).contains(targetNetwork)) {
-          addresses.unshift(address.address);
-        } else {
-          addresses.push(address.address);
-        }
-      }
-    }
-  }
-  return addresses.shift();
-};
-
-Wemo.prototype.getCallbackURL = function(opts) {
-  opts = opts || {};
-  if (!this._callbackURL) {
-    var port = this._server.address().port;
-    var host = this.getLocalInterfaceAddress(opts.clientHostname);
-    this._callbackURL = 'http://' + host + ':' + port;
-  }
-  return this._callbackURL;
-};
-
-Wemo.prototype.client = function(device) {
-  if (this._clients[device.UDN] && !this._clients[device.UDN].error) {
-    return this._clients[device.UDN];
-  }
-
-  var client = this._clients[device.UDN] = new WemoClient(device);
-  return client;
-};
+module.exports = Wemo
