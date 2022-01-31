@@ -186,10 +186,10 @@ class WemoClient extends EventEmitter {
   }
 
   async setBrightness (brightness) {
-    return this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', {
-      BinaryState: brightness <= 0 ? 0 : 1,
-      brightness
-    })
+    const settings = brightness === 0 
+      ? { BinaryState: 0 } 
+      : { brightness }
+    return this.soapAction('urn:Belkin:service:basicevent:1', 'SetBinaryState', settings)
   }
 
   async getBrightness () {
