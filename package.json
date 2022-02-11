@@ -3,6 +3,7 @@
   "version": "0.15.0",
   "description": "Client library for interacting with Belkin Wemo devices",
   "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "examples": "./examples"
   },
