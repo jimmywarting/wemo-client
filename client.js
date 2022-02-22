@@ -74,7 +74,8 @@ class WemoClient extends EventEmitter {
       method: 'POST',
       headers: {
         SOAPACTION: '"' + serviceType + '#' + action + '"',
-        'Content-Type': 'text/xml; charset="utf-8"'
+        'Content-Type': 'text/xml; charset="utf-8"',
+        'Content-Length': payload.length
       }
     }
 
